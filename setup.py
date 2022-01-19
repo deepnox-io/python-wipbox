@@ -8,6 +8,7 @@ This file is a part of python-deepnox-box-in-progress project.
 (c) 2021, Deepnox SAS.
 
 """
+
 import sys
 from distutils.core import Command
 
@@ -16,7 +17,14 @@ try:
 except ImportError:
     from distutils.core import setup
 
-__name__ = "wipbox"
+# Cf. https://stackoverflow.com/a/23265673
+try:
+    from pypandoc import convert
+    read_md = lambda f: convert(f, 'rst')
+except ImportError:
+    print("Warning: pypandoc module not found")
+
+    __name__ = "wipbox"
 __version__ = "0.0.1"
 VERSION = __version__
 
@@ -116,9 +124,7 @@ setup(
     author_email="contact@deepnox.io",
     url="https://github.com/deepnox-io/pythpn-wipbox",
     download_url=f"https://github.com/deepnox-io/pythpn-wipbox/{__version__}.tar.gz",
-    long_description="A set of modern Python libraries under development to simplify the execution of reusable routines by different projects.\n" +
-                     "Each namespace is intended to become a separate library, subject to validation of its quality level.\n" +
-                     "Each of the namespaces named `deepnox.*` is intended to be externalized as part of a specialized Python operating package.\n",
+    long_description=read_md("README.md"),
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Topic :: Software Development :: Libraries",

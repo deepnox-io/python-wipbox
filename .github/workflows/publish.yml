@@ -21,6 +21,7 @@ jobs:
         python3 setup.py install
         pip3 install -r requirements-test.txt
         python setup.py test
+        pip3 install -r requirements-build.txt
         python setup.py build
 
     - name: Publish package to https://pypi.org/.
