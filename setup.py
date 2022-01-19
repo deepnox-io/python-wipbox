@@ -121,9 +121,9 @@ setup(
                      "Each of the namespaces named `deepnox.*` is intended to be externalized as part of a specialized Python operating package.\n",
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
-        "Environment :: Console",
-        "License :: MIT",
-        "Programming Language :: Python :: 3",
+        "Topic :: Software Development :: Libraries",
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 3.9",
     ],
     keywords=[
         "deepnox",
