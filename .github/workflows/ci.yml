@@ -15,17 +15,27 @@ jobs:
       uses: actions/setup-python@master
       with:
         python-version: 3.9
+
     - name: Run tests
       shell: bash -l {0}
       run: |
         python3 setup.py install \
         && pip3 install -r requirements-test.txt \
         && python setup.py test
-    - name: Codeclimate test coverage
-      # https://kengz.gitbook.io/blog/engineering/github-actions-for-python-project
-      uses: paambaati/codeclimate-action@v2.2.4
-      env:
-        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-      with:
-        command: echo 'Uploading test coverage'
-        coverageCommand: yarn coverage
+
+    - name: Generate coverage report
+      run: |
+        export PYTHONPATH="${PYTHONPATH}:$(pwd)/src:$(pwd)/test"
+        pip install -r requirements.txt
+        pip install -r requirements-test.txt
+        pytest --cov-report term --cov-report xml:coverage.xml --cov=./src/deepnox
+
+    - name: Send report to CodeClimate
+      # Cf. https://towardsdatascience.com/automating-every-aspect-of-your-python-project-6517336af9da
+      run: |
+        export GIT_BRANCH="${GITHUB_REF/refs\/heads\//}"
+        curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+        chmod +x ./cc-test-reporter
+        ./cc-test-reporter format-coverage -t coverage.py coverage.xml
+        ./cc-test-reporter upload-coverage -r "${{ secrets.CC_TEST_REPORTER_ID }}"
+
