@@ -123,7 +123,6 @@ setup(
         "Development Status :: 2 - Pre-Alpha",
         "Environment :: Console",
         "License :: MIT",
-        "Operating System :: Linux",
         "Programming Language :: Python :: 3",
     ],
     keywords=[
