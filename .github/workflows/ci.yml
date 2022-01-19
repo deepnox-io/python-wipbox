@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [ init-project ]
+  pull_request:
+    branches: [ init-project ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Setup Python
+      uses: actions/setup-python@master
+      with:
+        python-version: 3.9
+    - name: Run tests
+      shell: bash -l {0}
+      run: |
+        python3 setup.py install \
+        && pip3 install -r requirements-test.txt \
+        && python setup.py test
+    - name: Codeclimate test coverage
+      uses: marsam/codeclimate-action@master
+      with:
+        command: echo 'Uploading test coverage'
+        reporter-id: ${{ secrets.CC_TEST_REPORTER_ID }}

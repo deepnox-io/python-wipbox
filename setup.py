@@ -16,11 +16,9 @@ try:
 except ImportError:
     from distutils.core import setup
 
-
-__name__ = "deepnox-box-in-progress"
-__version__ = "0.0.14"
+__name__ = "wipbox"
+__version__ = "0.0.1"
 VERSION = __version__
-
 
 with open("requirements.txt") as f:
     requires = f.readlines()
@@ -110,19 +108,19 @@ class UploadCoverage(Command):
 
 
 setup(
-    name="deepnox-box-in-progress",
-    version="{0}".format(VERSION),
-    description="(denier.io) Listening tickers and computing OHLC for different exchanges.",
-    license="Copyrighted 2021, Deepnox SAS",
-    author="François Michaud, for Deepnox SAS",
+    name=__name__,
+    version=f"{__version__}",
+    description="A set of modern Python libraries under development to simplify the execution of reusable routines by different projects.",
+    license="Copyrighted 2021-2022, Deepnox SAS",
+    author="The Deepnox team",
     author_email="contact@deepnox.io",
-    url="https://github.com/deepnox-io/pythpn-deepnox-bpx-in-progress",
-    download_url="https://github.com/deepnox-io/pythpn-deepnox-bpx-in-progress/{0}.tar.gz".format(
-        VERSION
-    ),
-    long_description="Listening tickers and computing OHLC for different exchanges.",
+    url="https://github.com/deepnox-io/pythpn-wipbox",
+    download_url=f"https://github.com/deepnox-io/pythpn-wipbox/{__version__}.tar.gz",
+    long_description="A set of modern Python libraries under development to simplify the execution of reusable routines by different projects.\n" +
+                     "Each namespace is intended to become a separate library, subject to validation of its quality level.\n" +
+                     "Each of the namespaces named `deepnox.*` is intended to be externalized as part of a specialized Python operating package.\n",
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 4 - Alpha",
         "Environment :: Console",
         "License :: MIT",
         "Operating System :: Linux",
@@ -130,6 +128,12 @@ setup(
     ],
     keywords=[
         "deepnox",
+        "wipbox",
+        "utilities",
+        "tools",
+        "various",
+        "work in progress",
+        "draft",
     ],
     packages=["deepnox"],
     package_dir={"deepnox": "src/deepnox"},

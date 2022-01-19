@@ -1,5 +1,5 @@
-# Changelog of python-deepnox-box-in-progress
+# Changelog of: python-wipbox
 
-## v0.0.5
+## v0.0.1
 
-* Working version
+- Initial version, partially tested.
