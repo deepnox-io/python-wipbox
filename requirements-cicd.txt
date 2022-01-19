@@ -1,0 +1,8 @@
+# Requirements for CI/CD: testing, building, packaging, publishing
+aioresponses~=0.7.2
+coverage~=6.1.1
+mock~=4.0.3
+pytest~=6.2.5
+pandoc~=2.17.0
+pytest-cov~=3.0.0
+

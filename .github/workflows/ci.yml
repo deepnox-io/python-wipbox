@@ -20,7 +20,7 @@ jobs:
       run: python3 setup.py install
     - name: "Install test dependencies"
       shell: bash -l {0}
-      run: pip3 install -r requirements-test.txt
+      run: pip3 install -r requirements-cicd.txt
     - name: "Run tests"
       shell: bash -l {0}
       run: python setup.py test
@@ -38,7 +38,7 @@ jobs:
       run: |
         export PYTHONPATH="${PYTHONPATH}:$(pwd)/src:$(pwd)/test"
         pip install -r requirements.txt
-        pip install -r requirements-test.txt
+        pip install -r requirements-cicd.txt
         pytest --cov-report term --cov-report xml:coverage.xml --cov=./src/deepnox
 
     - name: Send report to CodeClimate

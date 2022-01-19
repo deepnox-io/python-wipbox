@@ -1,2 +1,0 @@
-# Requirements for building and publishing
-pandoc~=2.17.0

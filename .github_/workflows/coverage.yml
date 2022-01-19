@@ -19,7 +19,7 @@ jobs:
       run: |
         export PYTHONPATH="${PYTHONPATH}:$(pwd)/src:$(pwd)/test"
         pip install -r requirements.txt
-        pip install -r requirements-test.txt
+        pip install -r requirements-cicd.txt
         pytest --cov-report term --cov-report xml:coverage.xml --cov=./src/deepnox
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v2
