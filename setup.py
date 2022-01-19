@@ -120,7 +120,7 @@ setup(
                      "Each namespace is intended to become a separate library, subject to validation of its quality level.\n" +
                      "Each of the namespaces named `deepnox.*` is intended to be externalized as part of a specialized Python operating package.\n",
     classifiers=[
-        "Development Status :: 4 - Alpha",
+        "Development Status :: 2 - Pre-Alpha",
         "Environment :: Console",
         "License :: MIT",
         "Operating System :: Linux",
