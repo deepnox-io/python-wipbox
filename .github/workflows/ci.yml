@@ -19,9 +19,9 @@ jobs:
     - name: Run tests
       shell: bash -l {0}
       run: |
-        python3 setup.py install \
-        && pip3 install -r requirements-test.txt \
-        && python setup.py test
+        python3 setup.py install
+        pip3 install -r requirements-test.txt
+        python setup.py test
 
   coverage:
     runs-on: ubuntu-latest
@@ -47,4 +47,3 @@ jobs:
         chmod +x ./cc-test-reporter
         ./cc-test-reporter format-coverage -t coverage.py coverage.xml
         ./cc-test-reporter upload-coverage -r "${{ secrets.CC_TEST_REPORTER_ID }}"
-
