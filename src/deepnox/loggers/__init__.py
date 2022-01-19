@@ -8,7 +8,7 @@ This file is a part of python-deepnox-box-in-progress project.
 (c) 2021, Deepnox SAS.
 """
 
-from deepnox.loggers import defaults
+from . import defaults
 
 import logging
 import logging.config
