@@ -22,7 +22,10 @@ jobs:
         && pip3 install -r requirements-test.txt \
         && python setup.py test
     - name: Codeclimate test coverage
-      uses: marsam/codeclimate-action@master
+      # https://kengz.gitbook.io/blog/engineering/github-actions-for-python-project
+      uses: paambaati/codeclimate-action@v2.2.4
+      env:
+        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
       with:
         command: echo 'Uploading test coverage'
-        reporter-id: ${{ secrets.CC_TEST_REPORTER_ID }}
+        coverageCommand: yarn coverage
