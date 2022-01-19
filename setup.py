@@ -10,7 +10,7 @@ This file is a part of python-deepnox-box-in-progress project.
 """
 
 import sys
-from collections import FunctionType
+from types import FunctionType
 from distutils.core import Command
 
 try:
