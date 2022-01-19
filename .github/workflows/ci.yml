@@ -7,7 +7,7 @@ on:
     branches: [ init-project ]
 
 jobs:
-  build:
+  tests:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
@@ -22,6 +22,15 @@ jobs:
         python3 setup.py install \
         && pip3 install -r requirements-test.txt \
         && python setup.py test
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Setup Python
+      uses: actions/setup-python@master
+      with:
+        python-version: 3.9
 
     - name: Generate coverage report
       run: |
