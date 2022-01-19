@@ -15,13 +15,15 @@ jobs:
       uses: actions/setup-python@master
       with:
         python-version: 3.9
-
-    - name: Run tests
+    - name: "Install dependencies"
       shell: bash -l {0}
-      run: |
-        python3 setup.py install
-        pip3 install -r requirements-test.txt
-        python setup.py test
+      run: python3 setup.py install
+    - name: "Install test dependencies"
+      shell: bash -l {0}
+      run: pip3 install -r requirements-test.txt
+    - name: "Run tests"
+      shell: bash -l {0}
+      run: python setup.py test
 
   coverage:
     runs-on: ubuntu-latest
