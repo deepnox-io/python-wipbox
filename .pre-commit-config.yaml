@@ -1,0 +1,51 @@
+# .pre-commit-config.yaml
+fail_fast: true
+
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.0.1
+  hooks:
+#    - id: check-yaml
+#      verbose: true
+    - id: end-of-file-fixer
+      verbose: true
+#    - id: trailing-whitespace
+#      verbose: true
+    - id: double-quote-string-fixer
+      verbose: true
+    - id: mixed-line-ending
+      verbose: true
+    - id: no-commit-to-branch
+      verbose: true
+      args: [--branch, main]
+
+    # Debug
+    - id: debug-statements
+      verbose: true
+
+#- repo: https://github.com/psf/black
+#  rev: 21.11b1
+#  hooks:
+#    - id: black
+#      language_version: python3.9
+
+- repo: https://github.com/PyCQA/isort
+  rev: 5.10.1
+  hooks:
+    - id: isort
+      args: [--profile, black]
+
+- repo: https://gitlab.com/pycqa/flake8
+  rev: 3.9.2
+  hooks:
+    - id: flake8
+
+- repo: local
+  hooks:
+    - id: unittest
+      name: unittest
+      entry: env PYTHONPATH=${PYTHONPATH}:$(pwd)/src:$(pwd)/test pytest
+      language: python
+      types: [python]
+      pass_filenames: false
+      verbose: true

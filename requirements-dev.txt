@@ -1,0 +1,2 @@
+# Development requirements
+pre-commit~=2.16.0
