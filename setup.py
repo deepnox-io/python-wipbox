@@ -10,6 +10,7 @@ This file is a part of python-deepnox-box-in-progress project.
 """
 
 import sys
+from collections import FunctionType
 from distutils.core import Command
 
 try:
@@ -17,6 +18,7 @@ try:
 except ImportError:
     from distutils.core import setup
 
+read_me: FunctionType = None
 # Cf. https://stackoverflow.com/a/23265673
 try:
     from pypandoc import convert
