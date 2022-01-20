@@ -1,10 +1,6 @@
 name: Publish package
 
 on:
-  workflow_run:
-    workflows: ["Coverage"]
-    types:
-      - completed
   push:
     tags:
       - '*'
