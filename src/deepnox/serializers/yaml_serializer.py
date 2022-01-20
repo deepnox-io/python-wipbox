@@ -9,7 +9,7 @@ This file is a part of python-deepnox-box-in-progress project.
 
 (c) 2021, Deepnox SAS.
 """
-
+from typing import Any
 
 import yaml
 
@@ -34,11 +34,11 @@ class YamlSerializer(BaseSerializer):
     yaml record_serializer.
     """
 
-    def __init__(self):
+    def __init__(self, encoder: Any = None):
         """
         Crate a new yaml record_serializer.
         """
-        super().__init__(name="yaml")
+        super().__init__(name="yaml", encoder=encoder)
 
     def dump(self, o: object):
         """
