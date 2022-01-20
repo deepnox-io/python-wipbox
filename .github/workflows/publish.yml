@@ -1,0 +1,33 @@
+name: Publish package
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Setup Python
+      uses: actions/setup-python@master
+      with:
+        python-version: 3.9
+
+    - name: "Run tests and build package"
+      shell: bash -l {0}
+      run: |
+        pip3 install -r requirements-cicd.txt \
+        && python3 setup.py install \
+        && python3 setup.py test \
+        && python3 setup.py build
+#        pwd
+#        ls -l
+
+    - name: Publish package to https://pypi.org/.
+      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_API_TOKEN }}

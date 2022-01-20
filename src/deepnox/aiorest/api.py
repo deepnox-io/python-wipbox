@@ -1,0 +1,3 @@
+
+class ApiEndpoint(object):
+    pass
