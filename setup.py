@@ -28,7 +28,7 @@ except ImportError:
     read_md: FunctionType = lambda f: open(f, 'r').read()
 
     __name__ = "wipbox"
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 VERSION = __version__
 
 with open("requirements.txt") as f:
