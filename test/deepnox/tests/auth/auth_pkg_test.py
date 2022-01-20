@@ -17,5 +17,6 @@ class AioboxPackageTestCase(BaseTestCase):
     def test__import_main_package(self):
         self.assertNotRaises(ImportError, lambda: __import__("deepnox.auth"))
 
+
 if __name__ == '__main__':
     unittest.main()
