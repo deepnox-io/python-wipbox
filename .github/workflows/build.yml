@@ -1,8 +1,8 @@
-name: Tests
+name: Build
 
 on:
   workflow_run:
-    workflows: ["tests"]
+    workflows: ["Tests"]
     types:
       - completed
 
