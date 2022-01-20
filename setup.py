@@ -18,13 +18,14 @@ try:
 except ImportError:
     from distutils.core import setup
 
-read_me: FunctionType = None
 # Cf. https://stackoverflow.com/a/23265673
 try:
     from pypandoc import convert
-    read_md = lambda f: convert(f, 'rst')
+
+    read_md: FunctionType = lambda f: convert(f, 'rst')
 except ImportError:
     print("Warning: pypandoc module not found")
+    read_md: FunctionType = lambda f: open(f, 'r').read()
 
     __name__ = "wipbox"
 __version__ = "0.0.1"
