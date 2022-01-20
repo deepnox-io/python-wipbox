@@ -1,8 +1,6 @@
 name: Build
 
 on:
-  push:
-    branches: [ init-project ]
   workflow_run:
     workflows: ["Tests"]
     types:
