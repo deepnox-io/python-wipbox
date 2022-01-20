@@ -133,6 +133,7 @@ setup(
     url="https://github.com/deepnox-io/pythpn-wipbox",
     download_url=f"https://github.com/deepnox-io/pythpn-wipbox/{__version__}.tar.gz",
     long_description=read_md("README.md"),
+    long_description_content_type="text/markdown",
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Topic :: Software Development :: Libraries",
