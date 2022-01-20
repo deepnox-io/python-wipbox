@@ -8,30 +8,29 @@ on:
 
 jobs:
   coverage:
-    coverage:
-      runs-on: ubuntu-latest
-      if: >
-        ${{ github.event.workflow_run.event == 'pull_request' &&
-            github.event.workflow_run.conclusion == 'success' }}
-      steps:
-        - uses: actions/checkout@master
-        - name: Setup Python
-          uses: actions/setup-python@master
-          with:
-            python-version: 3.9
+    runs-on: ubuntu-latest
+    if: >
+      ${{ github.event.workflow_run.event == 'pull_request' &&
+          github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - uses: actions/checkout@master
+      - name: Setup Python
+        uses: actions/setup-python@master
+        with:
+          python-version: 3.9
 
-        - name: Generate coverage report
-          run: |
-            export PYTHONPATH="${PYTHONPATH}:$(pwd)/src:$(pwd)/test"
-            pip install -r requirements.txt
-            pip install -r requirements-cicd.txt
-            pytest --cov-report term --cov-report xml:coverage.xml --cov=./src/deepnox
+      - name: Generate coverage report
+        run: |
+          export PYTHONPATH="${PYTHONPATH}:$(pwd)/src:$(pwd)/test"
+          pip install -r requirements.txt
+          pip install -r requirements-cicd.txt
+          pytest --cov-report term --cov-report xml:coverage.xml --cov=./src/deepnox
 
-        - name: Send report to CodeClimate
-          # Cf. https://towardsdatascience.com/automating-every-aspect-of-your-python-project-6517336af9da
-          run: |
-            export GIT_BRANCH="${GITHUB_REF/refs\/heads\//}"
-            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-            chmod +x ./cc-test-reporter
-            ./cc-test-reporter format-coverage -t coverage.py coverage.xml
-            ./cc-test-reporter upload-coverage -r "${{ secrets.CC_TEST_REPORTER_ID }}"
+      - name: Send report to CodeClimate
+        # Cf. https://towardsdatascience.com/automating-every-aspect-of-your-python-project-6517336af9da
+        run: |
+          export GIT_BRANCH="${GITHUB_REF/refs\/heads\//}"
+          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+          chmod +x ./cc-test-reporter
+          ./cc-test-reporter format-coverage -t coverage.py coverage.xml
+          ./cc-test-reporter upload-coverage -r "${{ secrets.CC_TEST_REPORTER_ID }}"
