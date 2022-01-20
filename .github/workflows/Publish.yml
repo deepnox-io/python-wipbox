@@ -18,10 +18,10 @@ jobs:
     - name: "Run tests and build package"
       shell: bash -l {0}
       run: |
-        pip3 install -r requirements-cicd.txt
-        python3 setup.py install
-        python3 setup.py test
-        python3 setup.py build
+        pip3 install -r requirements-cicd.txt \
+        && python3 setup.py install \
+        && python3 setup.py test \
+        && python3 setup.py build
 #        pwd
 #        ls -l
 
@@ -31,4 +31,3 @@ jobs:
       with:
         user: __token__
         password: ${{ secrets.PYPI_API_TOKEN }}
-        packages_dir: ./python-wipbox/dist
