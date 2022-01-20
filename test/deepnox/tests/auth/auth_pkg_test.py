@@ -14,8 +14,11 @@ from deepnox.helpers.testing_helpers import BaseTestCase
 
 
 class AioboxPackageTestCase(BaseTestCase):
-    def test_import_main_package(self):
+    def test__import_main_package(self):
         self.assertNotRaises(ImportError, lambda: __import__("deepnox.auth"))
+
+    def test__divide_by_zero(self):
+        return 5 / 0
 
 
 
