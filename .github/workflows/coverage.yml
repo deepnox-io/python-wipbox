@@ -5,6 +5,7 @@ on:
     workflows: ["Tests"]
     types:
       - completed
+    branches: [init-project]
 
 jobs:
   coverage:
