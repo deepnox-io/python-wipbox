@@ -13,6 +13,13 @@ import sys
 from types import FunctionType
 from distutils.core import Command
 
+__name__ = "wipbox"
+""" The project name. """
+
+__version__ = "0.0.3"
+""" The current version (work in progress). """
+
+
 try:
     from setuptools import setup
 except ImportError:
@@ -27,9 +34,7 @@ except ImportError:
     print("Warning: pypandoc module not found")
     read_md: FunctionType = lambda f: open(f, 'r').read()
 
-    __name__ = "wipbox"
-__version__ = "0.0.2"
-VERSION = __version__
+
 
 with open("requirements.txt") as f:
     requires = f.readlines()
