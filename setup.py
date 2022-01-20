@@ -47,6 +47,11 @@ else:
         "run",
         "-m",
         "pytest",
+        "test/"
+        "&&",
+        "coverage",
+        "report",
+        "-m"
     ]  # Compute coverage
     coverage_xml = [
         "coverage",
@@ -186,7 +191,7 @@ setup(
     tests_require=tests_require,
     cmdclass={
         "test": RunUnitTests,
-        # 'coverage': RunTestsCoverage,
+        'coverage': RunTestsCoverage,
         # 'upload': UploadCoverage
     },
 )

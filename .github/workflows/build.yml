@@ -1,0 +1,23 @@
+name: Tests
+
+on:
+  workflow_run:
+    workflows: ["tests"]
+    types:
+      - completed
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Setup Python
+      uses: actions/setup-python@master
+      with:
+        python-version: 3.9
+    - name: "Build package"
+      shell: bash -l {0}
+      run: |
+        pip3 install -r requirements-cicd.txt
+        python3 setup.py install
+        python setup.py build
