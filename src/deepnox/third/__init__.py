@@ -17,6 +17,7 @@ import numpy
 import pandas
 import pydantic
 import requests
+import shortuuid
 import yaml
 
 
@@ -27,6 +28,7 @@ numpy = numpy
 pandas = pandas
 pydantic = pydantic
 requests = requests
+shortuuid = shortuuid
 yaml = yaml
 
 

@@ -54,13 +54,18 @@ class ThirdImportTestCase(BaseTestCase):
         self.assertNotRaises(ModuleNotFoundError, lambda: __import__("deepnox.third"))
         self.assertTrue(lambda: hasattr(__import__("deepnox.third"), "pydantic"))
 
+    def test_import_pyyaml_dependency(self):
+        self.assertNotRaises(ModuleNotFoundError, lambda: __import__("deepnox.third"))
+        self.assertTrue(lambda: hasattr(__import__("deepnox.third"), "yaml"))
+
     def test_import_requests_dependency(self):
         self.assertNotRaises(ModuleNotFoundError, lambda: __import__("deepnox.third"))
         self.assertTrue(lambda: hasattr(__import__("deepnox.third"), "requests"))
 
-    def test_import_yaml_dependency(self):
+    def test_import_shortuuid_dependency(self):
         self.assertNotRaises(ModuleNotFoundError, lambda: __import__("deepnox.third"))
-        self.assertTrue(lambda: hasattr(__import__("deepnox.third"), "yaml"))
+        self.assertTrue(lambda: hasattr(__import__("deepnox.third"), "shortuuid"))
+
 
 
 if __name__ == '__main__':
