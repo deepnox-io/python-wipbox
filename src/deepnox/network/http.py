@@ -97,6 +97,14 @@ class HttpRequest(ExtendedBaseModel):
     end_at: Optional[datetime] = None
     """ Datetime ending request. """
 
+    body: Optional[str]
+
+    @property
+    def size(self) -> int:
+        if self.body is not None:
+            return len(self.body)
+        return 0
+
 
 class HttpGetRequest(HttpRequest):
     """
@@ -150,19 +158,6 @@ class HttpOptionsRequest(HttpRequest):
 
     method: HttpMethod = HttpMethod.OPTIONS
     """ The HTTP method to use. """
-
-
-class HttpRequestSummary(HttpRequest):
-    """
-    A request summary for HTTP protocol.
-    """
-
-    body: Optional[str]
-
-    @property
-    def size(self):
-        if self.body is not None:
-            return len(self.body)
 
 
 class HttpResponse(ExtendedBaseModel):
@@ -225,7 +220,7 @@ class HttpHit(ExtendedBaseModel):
     end_at: Optional[datetime]
     """ End datetime of request process. """
 
-    request: Optional[HttpRequestSummary]
+    request: Optional[HttpRequest]
     """ The HTTP request. """
 
     response: Optional[HttpResponse]
@@ -237,7 +232,7 @@ class HttpHit(ExtendedBaseModel):
     @property
     def elapsed_time(self):
         if self.end_at is not None and self.start_at is not None:
-            return arrow.get(self.end_at).timestamp() - arrow.get(self.end_at).timestamp()
+            return (arrow.get(self.end_at).timestamp() - arrow.get(self.end_at).timestamp()) * 1000
         return
 
     class Config:

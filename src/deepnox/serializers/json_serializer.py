@@ -33,11 +33,11 @@ def is_json(s):
 
 class ComplexEncoder(json.JSONEncoder):
     def default(self, obj):
-        if isinstance(obj, (datetime.date, datetime.datetime, arrow.Arrow)):
+        if isinstance(obj, (datetime.date, datetime.datetime)):
             return arrow.get(obj).isoformat()
-        elif isinstance(obj, (type)):
-            return str(obj)
-        elif isinstance(obj, (DeepnoxEnum)):
+        elif isinstance(obj, arrow.Arrow):
+            return obj.isoformat()
+        elif isinstance(obj, (type, DeepnoxEnum)):
             return str(obj)
         else:
             try:
