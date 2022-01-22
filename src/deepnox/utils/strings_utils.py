@@ -3,7 +3,7 @@
 """
 String utilities.
 
-This file is a part of python-deepnox-box-in-progress project.
+This file is a part of python-wipbox project.
 
 (c) 2021, Deepnox SAS.
 """
