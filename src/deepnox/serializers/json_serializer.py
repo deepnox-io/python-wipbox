@@ -11,6 +11,7 @@ This file is a part of python-deepnox-box-in-progress project.
 """
 import datetime
 import json
+import sys
 
 from deepnox.core.enumerations import DeepnoxEnum
 from deepnox.serializers.base_serializer import BaseSerializer
@@ -32,15 +33,17 @@ def is_json(s):
 
 class ComplexEncoder(json.JSONEncoder):
     def default(self, obj):
-        print("obj", type(obj))
         if isinstance(obj, (datetime.date, datetime.datetime)):
             return arrow.get(obj).isoformat()
-        elif isinstance(obj, (type)):
-            return str(obj)
-        elif isinstance(obj, (DeepnoxEnum)):
+        elif isinstance(obj, arrow.Arrow):
+            return obj.isoformat()
+        elif isinstance(obj, (type, DeepnoxEnum)):
             return str(obj)
         else:
-            return json.JSONEncoder.default(self, obj)
+            try:
+                return json.JSONEncoder.default(self, obj)
+            except TypeError as e:
+                return str(obj)
 
 
 class JsonSerializer(BaseSerializer):
@@ -48,11 +51,13 @@ class JsonSerializer(BaseSerializer):
     JSON record_serializer.
     """
 
-    def __init__(self):
+    def __init__(self, encoder: json.JSONEncoder = None):
         """
         Crate a new JSON record_serializer.
         """
-        super().__init__(name="json")
+        if encoder is None:
+            encoder = ComplexEncoder
+        super().__init__(name="json", encoder=encoder)
 
     def dump(self, o: object):
         """
@@ -62,7 +67,7 @@ class JsonSerializer(BaseSerializer):
         :return: The serializing object as string.
         :rtype: str
         """
-        return json.dumps(o, cls=ComplexEncoder)
+        return json.dumps(o, cls=self.encoder)
 
     def load(cls, s: str) -> object:
         """

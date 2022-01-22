@@ -74,14 +74,14 @@ class HttpClient(object):
         :type req: :class:`deepnox.network.http.HttpRequest`
         :return:
         """
-        LOGGER.debug(f'get(req:{req})')
+        LOGGER.debug(f'get(req:{req})', extra={"request": req.dict()})
         method = str(getattr(req, "method"))
         req.start_at = time.time()
         async with self.session() as session:
             try:
                 self.LOG.debug(f"req.url.to_python() {req.url}")
                 session_method_fn: FunctionType = getattr(session, method)
-                async with session_method_fn(str(req.url), headers=req.headers) as resp:
+                async with session_method_fn(str(req.url), headers=req.headers, data=req.data, params=req.params) as resp:
                     res = await self._parse_response(req, resp)
                     self._trace_audit(req, res)
             except Exception as e:
@@ -141,9 +141,21 @@ class HttpClient(object):
         req.method = HttpMethod.HEAD
         return self.request(req)
 
-    def _trace_audit(self, req, res):
+    def _trace_audit(self, req: HttpRequest, res: HttpResponse):
+        """
+        Add trace.
+
+        :param req: The HTTP request.
+        :type req: :class:`deepnox.network.http.HttpRequest`
+        :param res: The HTTP response.
+        :type res: :class:`deepnox.network.http.HttpResponse`
+        :return:
+        """
+        self.LOG.debug("_trace_audit(req, res)", extra={"req": req.dict(), "res": res.dict()})
         http_hit = HttpHit(start_at=req.start_at, end_at=res.end_at,
                            url=req.url, method=req.method,
-                           req=req.dict(), res=res.dict())
-        self.AUDITOR.error(f"{'Failed' if 200 < res.status_code >= 400 else 'Success'} while " +
-                           f"sending ({str(req.method)} at url:{req.url})", extra=JsonSerializer().dump(http_hit.dict()))
+                           request=req, response=res)
+        if 200 < res.status_code >= 400:
+            self.LOG.error(f"Failed: ({str(req.method)} at url:{req.url})", extra=http_hit.dict())
+        else:
+            self.LOG.info(f"Success: ({str(req.method)} at url:{req.url})", extra=http_hit.dict())

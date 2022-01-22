@@ -9,6 +9,7 @@ This file is a part of python-deepnox-box-in-progress project.
 
 (c) 2021, Deepnox SAS.
 """
+from typing import Any
 
 
 class BaseSerializer(object):
@@ -16,11 +17,12 @@ class BaseSerializer(object):
     A base class for record_serializer.
     """
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, encoder: Any = None):
         """
         Create a new record_serializer.
         """
         self.name = name
+        self.encoder = encoder
 
     def dump(self, o: object):
         """

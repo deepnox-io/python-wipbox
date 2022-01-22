@@ -7,13 +7,17 @@ This file is a part of python-deepnox-box-in-progress project.
 
 (c) 2021, Deepnox SAS.
 """
+import json
+from dataclasses import Field
 from datetime import datetime
 from enum import EnumMeta, unique
 from typing import Dict, Optional
+from uuid import UUID, uuid4
 
 from deepnox.core.enumerations import DeepnoxEnum
 from deepnox.models import ExtendedBaseModel
 from deepnox.network.urls import Url
+from deepnox.serializers.json_serializer import is_json
 from deepnox.third import arrow
 
 
@@ -93,6 +97,14 @@ class HttpRequest(ExtendedBaseModel):
     end_at: Optional[datetime] = None
     """ Datetime ending request. """
 
+    body: Optional[str]
+
+    @property
+    def size(self) -> int:
+        if self.body is not None:
+            return len(self.body)
+        return 0
+
 
 class HttpGetRequest(HttpRequest):
     """
@@ -148,37 +160,50 @@ class HttpOptionsRequest(HttpRequest):
     """ The HTTP method to use. """
 
 
-class HttpRequestSummary(HttpRequest):
-    """
-    A request summary for HTTP protocol.
-    """
-
-    body: Optional[str]
-
-    @property
-    def size(self):
-        if self.body is not None:
-            return len(self.body)
-
-
 class HttpResponse(ExtendedBaseModel):
     """
     A response summary for HTTP protocol.
     """
 
     status_code: Optional[int]
+    """ The HTTP status code. """
+
     size: Optional[int]
+    """ The HTTP response size (in bytes). """
+
     headers: Optional[Dict]
+    """ The HTTP headers as a key/value dictionary. """
+
     text: Optional[str]
-    json_: Optional[str]
+    """ The text of the response. """
+
+    _text_copy: Optional[str]
+    """ A backup of the response text. """
+
     end_at: Optional[datetime]
+    """ The response has been finished at... """
+
     elapsed_time: Optional[float]
+    """ Elapsed time between receiving response and starting request. """
+
+    @property
+    def json_body(self):
+        """
+        Returns a dict if body seems te be a JSON.
+        """
+        if self.text is None and self._text_copy is not None:
+            return self.json_body
+        if is_json(self.text):
+            return json.loads(self._text_copy)
 
 
 class HttpHit(ExtendedBaseModel):
     """
     A HTTP hit.
     """
+
+    # request_id: UUID = Field(default_factory=uuid4)
+    """ The unique request identifier. """
 
     status_code: Optional[int]
     """ The HTTP status code. """
@@ -195,7 +220,7 @@ class HttpHit(ExtendedBaseModel):
     end_at: Optional[datetime]
     """ End datetime of request process. """
 
-    request: Optional[HttpRequestSummary]
+    request: Optional[HttpRequest]
     """ The HTTP request. """
 
     response: Optional[HttpResponse]
@@ -207,5 +232,12 @@ class HttpHit(ExtendedBaseModel):
     @property
     def elapsed_time(self):
         if self.end_at is not None and self.start_at is not None:
-            return arrow.get(self.end_at).timestamp() - arrow.get(self.end_at).timestamp()
+            return (arrow.get(self.end_at).timestamp() - arrow.get(self.end_at).timestamp()) * 1000
         return
+
+    class Config:
+        json_encoders = {
+            datetime: lambda dt: arrow.get(dt).isoformat(),
+            HttpRequest: lambda req: req.dict(),
+            HttpResponse: lambda res: res.dict(),
+        }
