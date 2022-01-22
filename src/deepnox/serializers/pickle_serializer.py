@@ -5,7 +5,7 @@ A serializer for native Python pickle format.
 
 Package: deepnox.serializers.pickle_serializers
 
-This file is a part of python-deepnox-box-in-progress project.
+This file is a part of python-wipbox project.
 
 (c) 2021, Deepnox SAS.
 """

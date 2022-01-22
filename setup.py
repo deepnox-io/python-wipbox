@@ -3,7 +3,7 @@
 """
 The setup script.
 
-This file is a part of python-deepnox-box-in-progress project.
+This file is a part of python-wipbox project.
 
 (c) 2021, Deepnox SAS.
 
@@ -16,7 +16,7 @@ from distutils.core import Command
 __name__ = "wipbox"
 """ The project name. """
 
-__version__ = "0.0.3"
+__version__ = "0.0.6"
 """ The current version (work in progress). """
 
 

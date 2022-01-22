@@ -5,7 +5,7 @@ This package provides simple routines for defining models or schemas.
 
 Package: deepnox.models
 
-This file is a part of python-deepnox-box-in-progress project.
+This file is a part of python-wipbox project.
 
 (c) 2021, Deepnox SAS.
 """
@@ -59,6 +59,8 @@ class ExtendedBaseModel(pydantic.BaseModel):
             props = [prop for prop in props if prop in include]
         if exclude:
             props = [prop for prop in props if prop not in exclude]
+        if exclude_none:
+            props = [prop for prop in props if getattr(self, prop) is not None]
 
         # Update the attribute dict with the properties
         if props:
