@@ -62,7 +62,6 @@ class Url(ExtendedBaseModel):
             return v
         if isinstance(v, str):
             return Scheme(v)
-        raise TypeError
 
     # @property
     # def netloc(self):
@@ -98,4 +97,4 @@ class Url(ExtendedBaseModel):
         dict_encoders = {
             Scheme: lambda s: str(s),
         }
-
+        extra = pydantic.Extra.forbid

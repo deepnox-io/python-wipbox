@@ -71,4 +71,9 @@ class SettingsReader(DeepnoxDict):
         for attr, value in self._settings.items():
             yield attr, value
 
+    def __getattr__(self, item):
+        if item in self._settings.keys():
+            return self._settings.get(item)
+        return super().__getattr__(item)
+
 

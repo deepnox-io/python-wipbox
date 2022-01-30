@@ -131,7 +131,6 @@ class HttpRequest(ExtendedBaseModel, extra=pydantic.Extra.forbid, orm_mode=True)
             return v
         if isinstance(v, dict):
             return HttpRequestPayload(**v)
-        raise TypeError
 
     @property
     def size(self) -> int:

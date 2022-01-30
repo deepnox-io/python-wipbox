@@ -85,7 +85,7 @@ class HttpRequestTestCase(BaseTestCase):
     """
 
     def test__get_method_func_from_client(self):
-        url = Url(scheme=Scheme.HTTPS, host="example.org", path="api/test")
+        url = Url(scheme=Scheme.HTTPS, hostname="example.org", path="api/test")
         req = HttpRequest(url=url)
         self.assertIsNotNone(req)
 
@@ -96,24 +96,24 @@ class HttpGetRequestTestCase(BaseTestCase):
     """
 
     def test__create_a_valid_instance_should_be_okay(self):
-        url = Url(scheme=Scheme.HTTPS, host="example.org", path="api/test")
+        url = Url(scheme=Scheme.HTTPS, hostname="example.org", path="api/test")
         req = HttpGetRequest(url=url)
         self.assertEqual(HttpMethod.GET, req.method)
 
     def test__create_request_containing_payload_should_be_okay(self):
-        url = Url(scheme=Scheme.HTTPS, host="example.org", path="api/test")
+        url = Url(scheme=Scheme.HTTPS, hostname="example.org", path="api/test")
         req = HttpGetRequest(url=url, payload=HttpRequestPayload(params={"name": "name_test"}, data="data_test"))
         self.assertEqual(HttpMethod.GET, req.method)
         self.assertEqual({"name": "name_test"}, req.payload.params)
         self.assertEqual("data_test", req.payload.data)
 
     def test__request_should_recursively_be_converted_as_dict(self):
-        url = Url(scheme=Scheme.HTTPS, host="example.org", path="api/test")
+        url = Url(scheme=Scheme.HTTPS, hostname="example.org", path="api/test")
         req = HttpGetRequest(url=url, payload=HttpRequestPayload(params={"name": "name_test"}, data="data_test"))
         self.assertEqual(
             {
                 "method": HttpMethod.GET,
-                "url": {"scheme": Scheme.HTTPS, "host": "example.org", "path": "api/test"},
+                "url": {"scheme": Scheme.HTTPS, "hostname": "example.org", "path": "api/test"},
                 "payload": {
                     "params": {"name": "name_test"},
                     "data": "data_test"
@@ -133,7 +133,7 @@ class HttpPostRequestTestCase(BaseTestCase):
     """
 
     def test__create_a_valid_instance_should_be_okay(self):
-        url = Url(scheme=Scheme.HTTPS, host="example.org", path="api/test")
+        url = Url(scheme=Scheme.HTTPS, hostname="example.org", path="api/test")
         req = HttpPostRequest(url=url)
         self.assertEqual(HttpMethod.POST, req.method)
 
@@ -144,7 +144,7 @@ class HttpPutRequestTestCase(BaseTestCase):
     """
 
     def test__create_a_valid_instance_should_be_okay(self):
-        url = Url(scheme=Scheme.HTTPS, host="example.org", path="api/test")
+        url = Url(scheme=Scheme.HTTPS, hostname="example.org", path="api/test")
         req = HttpPutRequest(url=url)
         self.assertEqual(HttpMethod.PUT, req.method)
 
@@ -155,7 +155,7 @@ class HttpPatchRequestTestCase(BaseTestCase):
     """
 
     def test__create_a_valid_instance_should_be_okay(self):
-        url = Url(scheme=Scheme.HTTPS, host="example.org", path="api/test")
+        url = Url(scheme=Scheme.HTTPS, hostname="example.org", path="api/test")
         req = HttpPatchRequest(url=url)
         self.assertEqual(HttpMethod.PATCH, req.method)
 
@@ -166,7 +166,7 @@ class HttpPatchOptionsTestCase(BaseTestCase):
     """
 
     def test__create_a_valid_instance_should_be_okay(self):
-        url = Url(scheme=Scheme.HTTPS, host="example.org", path="api/test")
+        url = Url(scheme=Scheme.HTTPS, hostname="example.org", path="api/test")
         req = HttpOptionsRequest(url=url)
         self.assertEqual(HttpMethod.OPTIONS, req.method)
 
@@ -177,7 +177,7 @@ class HttpDeleteOptionsTestCase(BaseTestCase):
     """
 
     def test__create_a_valid_instance_should_be_okay(self):
-        url = Url(scheme=Scheme.HTTPS, host="example.org", path="api/test")
+        url = Url(scheme=Scheme.HTTPS, hostname="example.org", path="api/test")
         req = HttpDeleteRequest(url=url)
         self.assertEqual(HttpMethod.DELETE, req.method)
 
