@@ -16,7 +16,7 @@ from distutils.core import Command
 __name__ = "wipbox"
 """ The project name. """
 
-__version__ = "0.0.10"
+__version__ = "0.0.11"
 """ The current version (work in progress). """
 
 
@@ -170,6 +170,7 @@ setup(
         "deepnox.repositories",
         "deepnox.serializers",
         "deepnox.settings",
+        "deepnox.tests",
         "deepnox.third",
         "deepnox.utils",
     ],
@@ -181,7 +182,7 @@ setup(
         "deepnox.clients": "src/deepnox/clients",
         "deepnox.core": "src/deepnox/core",
         "deepnox.files": "src/deepnox/files",
-        "deepnox.helpers": "src/deepnox/clients",
+        "deepnox.helpers": "src/deepnox/helpers",
         "deepnox.loggers": "src/deepnox/loggers",
         "deepnox.models": "src/deepnox/models",
         "deepnox.network": "src/deepnox/network",
@@ -190,6 +191,7 @@ setup(
         "deepnox.serializers": "src/deepnox/serializers",
         "deepnox.settings": "src/deepnox/settings",
         "deepnox.third": "src/deepnox/third",
+        "deepnox.tests": "test/deepnox/tests",
         "deepnox.utils": "src/deepnox/utils",
     },
     scripts=[],
