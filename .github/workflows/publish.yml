@@ -22,7 +22,7 @@ jobs:
         && python3 setup.py install \
         && python3 setup.py test \
         && python3 setup.py build \
-        && python3 setup.py sdist
+        && python3 setup.py sdist bdist_wheel
 #        pwd
 #        ls -l
 
@@ -32,3 +32,4 @@ jobs:
       with:
         user: __token__
         password: ${{ secrets.PYPI_API_TOKEN }}
+        repository_url: ${{ secrets.PYPI_REPOSITORY_URL }}
