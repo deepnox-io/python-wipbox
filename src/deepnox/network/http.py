@@ -11,14 +11,16 @@ import json
 from dataclasses import Field
 from datetime import datetime
 from enum import EnumMeta, unique
-from typing import Dict, Optional
+from typing import Dict, Optional, Any, Union
 from uuid import UUID, uuid4
+
+from pydantic import validator
 
 from deepnox.core.enumerations import DeepnoxEnum
 from deepnox.models import ExtendedBaseModel
 from deepnox.network.urls import Url
 from deepnox.serializers.json_serializer import is_json
-from deepnox.third import arrow
+from deepnox.third import arrow, pydantic, yaml
 
 
 class HttpMethodMetaClass(EnumMeta):
@@ -60,7 +62,20 @@ class HttpMethod(DeepnoxEnum, metaclass=HttpMethodMetaClass):
         return getattr(cls, s.upper())
 
 
-class HttpRequest(ExtendedBaseModel):
+class HttpRequestPayload(ExtendedBaseModel, extra=pydantic.Extra.forbid, orm_mode=True):
+    """
+    Payload of a HTTP request.
+
+    """
+
+    params: Optional[Dict] = None
+    """ The querystring parameters. """
+
+    data: Optional[Union[str, Dict]] = None
+    """ The raw body passed to request. """
+
+
+class HttpRequest(ExtendedBaseModel, extra=pydantic.Extra.forbid, orm_mode=True):
     """
     An HTTP request.
 
@@ -69,11 +84,14 @@ class HttpRequest(ExtendedBaseModel):
     method: HttpMethod = HttpMethod.GET
     """ The HTTP method to use. """
 
-    url: Url = None
+    url: Optional[Union[Url, Dict]] = None
     """ The targeted url."""
 
     headers: Optional[Dict] = None
     """ The HTTP request headers."""
+
+    payload: Optional[HttpRequestPayload] = None
+    """ The HTTP payload. """
 
     params: Optional[Dict] = None
     """ The parameters to send. """
@@ -99,11 +117,34 @@ class HttpRequest(ExtendedBaseModel):
 
     body: Optional[str]
 
+    @validator('url', pre=True, always=True)
+    def url_autoconvert(cls, v):
+        if isinstance(v, Url):
+            return v
+        if isinstance(v, dict):
+            return Url(**v)
+        raise TypeError
+
+    @validator('payload', pre=True, always=True)
+    def payload_autoconvert(cls, v):
+        if isinstance(v, HttpRequestPayload):
+            return v
+        if isinstance(v, dict):
+            return HttpRequestPayload(**v)
+        raise TypeError
+
     @property
     def size(self) -> int:
         if self.body is not None:
             return len(self.body)
         return 0
+
+    def dict(
+            self,
+            **kwargs
+    ) -> Dict[str, Any]:
+        kwargs.update({"exclude_none": True})
+        return super().dict(**kwargs)
 
 
 class HttpGetRequest(HttpRequest):
@@ -160,7 +201,7 @@ class HttpOptionsRequest(HttpRequest):
     """ The HTTP method to use. """
 
 
-class HttpResponse(ExtendedBaseModel):
+class HttpResponse(ExtendedBaseModel, extra=pydantic.Extra.forbid, orm_mode=True):
     """
     A response summary for HTTP protocol.
     """
@@ -185,16 +226,6 @@ class HttpResponse(ExtendedBaseModel):
 
     elapsed_time: Optional[float]
     """ Elapsed time between receiving response and starting request. """
-
-    @property
-    def json_body(self):
-        """
-        Returns a dict if body seems te be a JSON.
-        """
-        if self.text is None and self._text_copy is not None:
-            return self.json_body
-        if is_json(self.text):
-            return json.loads(self._text_copy)
 
 
 class HttpHit(ExtendedBaseModel):
@@ -241,3 +272,16 @@ class HttpHit(ExtendedBaseModel):
             HttpRequest: lambda req: req.dict(),
             HttpResponse: lambda res: res.dict(),
         }
+
+
+def build_http_request_from_yaml_template(templates_manager=None, template_filename: str = None, ctx=None):
+    """
+    Build a request from a YAML template.
+
+    :param templates_manager:
+    :type:
+    :return:
+    """
+    data = templates_manager.render(template_filename, ctx)
+    d = yaml.safe_load(data)
+    return HttpRequest(**d)
