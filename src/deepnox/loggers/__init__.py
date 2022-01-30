@@ -9,10 +9,13 @@ This file is a part of python-wipbox project.
 """
 
 from . import defaults
+from . import formatters 
 
 import logging
 import logging.config
 import os
+
+formatters = formatters
 
 __import__("pkg_resources").declare_namespace(__name__)
 
