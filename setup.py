@@ -16,7 +16,7 @@ from distutils.core import Command
 __name__ = "wipbox"
 """ The project name. """
 
-__version__ = "0.0.9"
+__version__ = "0.0.10"
 """ The current version (work in progress). """
 
 
@@ -179,7 +179,7 @@ setup(
         "deepnox.aiorest": "src/deepnox/aiorest",
         "deepnox.auth": "src/deepnox/auth",
         "deepnox.clients": "src/deepnox/clients",
-        "deepnox.core": "src/deepnox/clients",
+        "deepnox.core": "src/deepnox/core",
         "deepnox.files": "src/deepnox/files",
         "deepnox.helpers": "src/deepnox/clients",
         "deepnox.loggers": "src/deepnox/loggers",
