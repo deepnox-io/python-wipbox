@@ -10,13 +10,31 @@ This file is a part of (denier.io).
 """
 
 import unittest
+from unittest import mock
+from unittest.mock import mock_open
 
-from deepnox.settings.base import NotFoundConfigurationError
+from deepnox.helpers.testing_helpers import BaseTestCase
+from deepnox.settings.base import NotFoundConfigurationError, SettingsReader
 
 
-class NotFoundConfigurationErrorTestCase(unittest.TestCase):
-    def test___init__(self):
+class NotFoundConfigurationErrorTestCase(BaseTestCase):
+
+    @mock.patch('os.path.isfile')
+    def test___init__(self, mock_isfile):
+        mock_isfile.return_value = False
         self.assertIsInstance(NotFoundConfigurationError(filename='/data/filename'), NotFoundConfigurationError)
+
+
+class SettingsReaderTestCase(BaseTestCase):
+
+    @mock.patch("builtins.open", new_callable=mock_open, read_data="name: name_test\nvalue: 1.0")
+    def test__create_an_instance_using_existing_file_should_be_okay(self, mock_file):
+        settings = SettingsReader('/path/to/settings')
+        mock_file.assert_called_with('/path/to/settings')
+        self.assertEqual("name_text", settings.NAME)
+
+    def test__create_an_instance_using_existing_file_should_raise_an_error(self):
+        self.assertRaises(NotFoundConfigurationError, lambda: SettingsReader('/path/to/settings'))
 
 
 if __name__ == '__main__':

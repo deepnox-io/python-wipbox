@@ -7,22 +7,23 @@ This file is a part of python-wipbox project.
 
 (c) 2021, Deepnox SAS.
 """
+import json
 import logging
 import unittest
+
+from deepnox.third import pydantic
 
 from deepnox.helpers.testing_helpers import BaseTestCase
 from deepnox.network import Scheme
 from deepnox.network.http import HttpRequest, HttpMethod, HttpGetRequest, HttpPutRequest, HttpPostRequest, \
-    HttpPatchRequest, HttpOptionsRequest, HttpDeleteRequest
+    HttpPatchRequest, HttpOptionsRequest, HttpDeleteRequest, HttpRequestPayload
 from deepnox.network.urls import Url
 
 LOGGER = logging.getLogger(__name__)
 """ The main LOGGER. """
 
 
-
-
-class HttpMethodTestCase(unittest.TestCase):
+class HttpMethodTestCase(BaseTestCase):
     """
     Test cases for :class:`deepnox.network.http.HttpMethod`
     """
@@ -57,6 +58,27 @@ class HttpMethodTestCase(unittest.TestCase):
         self.assertEqual(HttpMethod.HEAD.value, "head")
 
 
+class HttpRequestPayloadTestCase(BaseTestCase):
+    """
+    Test cases for :class:`deepnox.network.http.HttpRequestPayload`
+    """
+
+    def test__create_an_empty_instance_should_be_okay(self):
+        self.assertIsInstance(HttpRequestPayload(), HttpRequestPayload)
+
+    def test__create_an_instance_using_invalid_values_should_raise_an_error(self):
+        self.assertRaises(pydantic.ValidationError, lambda: HttpRequestPayload(params="heurk!"))
+
+    def test__create_a_simple_payload_should_be_okay(self):
+        payload = HttpRequestPayload(params={"name": "name_test", "value": 0.42}, data="data_test")
+        self.assertIsInstance(payload.params, dict)
+        self.assertIsInstance(payload.data, str)
+        self.assertEqual({"name": "name_test", "value": 0.42}, payload.params)
+        self.assertEqual("data_test", payload.data)
+        self.assertEqual({"params": {"name": "name_test", "value": 0.42}, "data": "data_test"},
+                         payload.dict())
+
+
 class HttpRequestTestCase(BaseTestCase):
     """
     Test cases of :class:`deepnox.network.http.HttpRequest`
@@ -68,7 +90,7 @@ class HttpRequestTestCase(BaseTestCase):
         self.assertIsNotNone(req)
 
 
-class HttpGetRequestTestCase(unittest.TestCase):
+class HttpGetRequestTestCase(BaseTestCase):
     """
     Test cases of :class:`deepnox.network.http.HttpGetRequest`
     """
@@ -78,8 +100,34 @@ class HttpGetRequestTestCase(unittest.TestCase):
         req = HttpGetRequest(url=url)
         self.assertEqual(HttpMethod.GET, req.method)
 
+    def test__create_request_containing_payload_should_be_okay(self):
+        url = Url(scheme=Scheme.HTTPS, host="example.org", path="api/test")
+        req = HttpGetRequest(url=url, payload=HttpRequestPayload(params={"name": "name_test"}, data="data_test"))
+        self.assertEqual(HttpMethod.GET, req.method)
+        self.assertEqual({"name": "name_test"}, req.payload.params)
+        self.assertEqual("data_test", req.payload.data)
 
-class HttpPostRequestTestCase(unittest.TestCase):
+    def test__request_should_recursively_be_converted_as_dict(self):
+        url = Url(scheme=Scheme.HTTPS, host="example.org", path="api/test")
+        req = HttpGetRequest(url=url, payload=HttpRequestPayload(params={"name": "name_test"}, data="data_test"))
+        self.assertEqual(
+            {
+                "method": HttpMethod.GET,
+                "url": {"scheme": Scheme.HTTPS, "host": "example.org", "path": "api/test"},
+                "payload": {
+                    "params": {"name": "name_test"},
+                    "data": "data_test"
+                }
+            },
+            req.dict(exclude_none=True)
+        )
+
+        self.assertEqual(HttpMethod.GET, req.method)
+        self.assertEqual({"name": "name_test"}, req.payload.params)
+        self.assertEqual("data_test", req.payload.data)
+
+
+class HttpPostRequestTestCase(BaseTestCase):
     """
     Test cases of :class:`deepnox.network.http.HttpPostRequest`
     """
@@ -90,7 +138,7 @@ class HttpPostRequestTestCase(unittest.TestCase):
         self.assertEqual(HttpMethod.POST, req.method)
 
 
-class HttpPutRequestTestCase(unittest.TestCase):
+class HttpPutRequestTestCase(BaseTestCase):
     """
     Test cases of :class:`deepnox.network.http.HttpPutRequest`
     """
@@ -101,7 +149,7 @@ class HttpPutRequestTestCase(unittest.TestCase):
         self.assertEqual(HttpMethod.PUT, req.method)
 
 
-class HttpPatchRequestTestCase(unittest.TestCase):
+class HttpPatchRequestTestCase(BaseTestCase):
     """
     Test cases of :class:`deepnox.network.http.HttpPutRequest`
     """
@@ -112,7 +160,7 @@ class HttpPatchRequestTestCase(unittest.TestCase):
         self.assertEqual(HttpMethod.PATCH, req.method)
 
 
-class HttpPatchOptionsTestCase(unittest.TestCase):
+class HttpPatchOptionsTestCase(BaseTestCase):
     """
     Test cases of :class:`deepnox.network.http.HttpPutRequest`
     """
@@ -123,7 +171,7 @@ class HttpPatchOptionsTestCase(unittest.TestCase):
         self.assertEqual(HttpMethod.OPTIONS, req.method)
 
 
-class HttpDeleteOptionsTestCase(unittest.TestCase):
+class HttpDeleteOptionsTestCase(BaseTestCase):
     """
     Test cases of :class:`deepnox.network.http.HttpPutRequest`
     """

@@ -13,10 +13,9 @@ import unittest
 from deepnox.helpers.testing_helpers import BaseTestCase
 
 
-class AioboxPackageTestCase(BaseTestCase):
+class SettingsPackageTestCase(BaseTestCase):
     def test_import_main_package(self):
         self.assertNotRaises(ImportError, lambda: __import__("deepnox.settings"))
-
 
 
 if __name__ == '__main__':

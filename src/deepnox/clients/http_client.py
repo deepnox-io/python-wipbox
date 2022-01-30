@@ -11,11 +11,11 @@ This file is a part of (deepnox.clients) project.
 import asyncio
 import logging
 import time
+import urllib
 from types import FunctionType
 
 from deepnox import loggers
-from deepnox.network.http import HttpRequest, HttpResponse, HttpHit, HttpMethod
-from deepnox.serializers.json_serializer import JsonSerializer
+from deepnox.network.http import HttpRequest, HttpResponse, HttpHit, HttpMethod, HttpRequestPayload
 from deepnox.third import aiohttp
 
 LOGGER = loggers.factory(__name__)
@@ -34,18 +34,20 @@ class HttpClient(object):
     def __init__(self,
                  loop: asyncio.AbstractEventLoop = None,
                  auditor_logger=None,
+                 timeout: int = 30,
+                 verify_ssl: bool = False
                  ):
         self.loop = loop or asyncio.get_event_loop()
         self.AUDITOR = auditor_logger or loggers.auditor(f'auditor')
 
-    def session(self) -> aiohttp.ClientSession:
-        """
-        Get the current :class:`aiohttp.ClientSession`.
-
-        :return: The current session.
-        :rtype: :class:`aiohttp.ClientSession`
-        """
-        return aiohttp.ClientSession(loop=self.loop)
+    @property
+    def get_session(self):
+        def _wrap():
+            cookie_jar = aiohttp.CookieJar()
+            timeout = aiohttp.ClientTimeout(total=None, sock_connect=30, sock_read=30)
+            connector = aiohttp.TCPConnector(ssl=False)
+            return aiohttp.ClientSession(cookie_jar=cookie_jar, timeout=timeout, connector=connector)
+        return _wrap
 
     async def _parse_response(self, req: HttpRequest, resp: HttpResponse):
         """
@@ -67,6 +69,17 @@ class HttpClient(object):
                                 elapsed_time=end_at - req.start_at)
         return response
 
+    def _build_request_args(self, req: HttpRequest):
+        data = {"url": str(req.url)}
+        if isinstance(req.headers, dict):
+            data.update({"headers": req.headers})
+        if isinstance(req.payload, HttpRequestPayload):
+            if isinstance(req.payload.params, dict):
+                data.update({"params": req.payload.params})
+            if isinstance(req.payload.data, str):
+                data.update({"data": req.payload.data})
+        return data
+
     async def request(self, req: HttpRequest):
         """
         Send a HTTP request.
@@ -77,15 +90,16 @@ class HttpClient(object):
         LOGGER.debug(f'get(req:{req})', extra={"request": req.dict()})
         method = str(getattr(req, "method"))
         req.start_at = time.time()
-        async with self.session() as session:
+        async with self.get_session() as session:
             try:
                 self.LOG.debug(f"req.url.to_python() {req.url}")
                 session_method_fn: FunctionType = getattr(session, method)
-                async with session_method_fn(str(req.url), headers=req.headers, data=req.data, params=req.params) as resp:
+                async with session_method_fn(**self._build_request_args(req)) as resp:
                     res = await self._parse_response(req, resp)
                     self._trace_audit(req, res)
+                    return res
             except Exception as e:
-                self.LOG.error(f'Response timeout (req:{req.url}', exc_info=e)
+                self.LOG.error(f'Response error: (req:{req.url})', exc_info=e)
 
     async def get(self, req: HttpRequest):
         """
@@ -157,5 +171,17 @@ class HttpClient(object):
                            request=req, response=res)
         if 200 < res.status_code >= 400:
             self.LOG.error(f"Failed: ({str(req.method)} at url:{req.url})", extra=http_hit.dict())
+            print(http_hit.json())
         else:
             self.LOG.info(f"Success: ({str(req.method)} at url:{req.url})", extra=http_hit.dict())
+
+    # def __del__(self):
+    #     try:
+    #         asyncio.create_task(self._close_session())
+    #     except RuntimeError:
+    #         self.loop.run_until_complete(self._close_session())
+    #
+    # async def _close_session(self):
+    #     if not self._session.closed:
+    #         self._session.close()
+

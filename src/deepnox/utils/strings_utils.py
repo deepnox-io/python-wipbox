@@ -28,7 +28,7 @@ def remove_slash_at_start_and_at_end(s: str) -> str:
     r = r.strip()
     if r[0] == "/":
         r = r[1:]
-    if r[len(r)-1] == "/":
+    if len(r) > 0 and r[len(r)-1] == "/":
         r = r[:len(r)-1]
     return r
 
