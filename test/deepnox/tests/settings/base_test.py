@@ -27,11 +27,13 @@ class NotFoundConfigurationErrorTestCase(BaseTestCase):
 
 class SettingsReaderTestCase(BaseTestCase):
 
+    @mock.patch("os.path.isfile")
     @mock.patch("builtins.open", new_callable=mock_open, read_data="name: name_test\nvalue: 1.0")
-    def test__create_an_instance_using_existing_file_should_be_okay(self, mock_file):
+    def test__create_an_instance_using_existing_file_should_be_okay(self, mock_file, mock_isfile):
+        mock_isfile.return_value = True
         settings = SettingsReader('/path/to/settings')
-        mock_file.assert_called_with('/path/to/settings')
-        self.assertEqual("name_text", settings.NAME)
+        mock_file.assert_called_with('/path/to/settings', 'r')
+        self.assertEqual("name_test", settings.name)
 
     def test__create_an_instance_using_existing_file_should_raise_an_error(self):
         self.assertRaises(NotFoundConfigurationError, lambda: SettingsReader('/path/to/settings'))
