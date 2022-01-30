@@ -27,7 +27,7 @@ jobs:
 #        ls -l
 
     - name: Publish package to https://pypi.org/.
-      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags') && endsWith(github.ref, '-test') is False
+      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags') && !endsWith(github.ref, '-test')
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         user: __token__
