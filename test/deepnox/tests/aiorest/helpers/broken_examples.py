@@ -57,15 +57,4 @@ if __name__ == "__main__":
     client = BallDontLieClient(loop=loop)
 
 
-    # r = loop.run_until_complete(main(client))
-    #print("r1", r)
     r = loop.run_until_complete(client.players.filter(page=2))
-    # r = loop.run_until_complete(main(client))
-    print("r2", r)
-    # r = loop.run_until_complete(client.players.all())
-    # #r = loop.run_until_complete(main(client))
-    # print("r3", r)
-    print("r=", len(client.history))
-    # for o in client.history:
-    #     if o is not None:
-    #         print(o.to_dict())
