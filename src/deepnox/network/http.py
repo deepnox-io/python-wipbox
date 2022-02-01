@@ -7,12 +7,12 @@ This file is a part of python-wipbox project.
 
 (c) 2021, Deepnox SAS.
 """
-
+import json
 from datetime import datetime
 from enum import EnumMeta, unique
 from typing import Dict, Optional, Any, Union
 
-from pydantic import validator
+from pydantic import validator, root_validator
 
 from deepnox.auth.base import BaseAuthorization
 from deepnox.core.enumerations import DeepnoxEnum
@@ -73,6 +73,9 @@ class HttpRequestPayload(ExtendedBaseModel, extra=pydantic.Extra.forbid, orm_mod
     data: Optional[Union[str, Dict]] = None
     """ The raw body passed to request. """
 
+    is_json: bool = True
+    """ Specify if data is or not a JSON. """
+
 
 class HttpRequest(ExtendedBaseModel, extra=pydantic.Extra.forbid, orm_mode=True):
     """
@@ -129,18 +132,19 @@ class HttpRequest(ExtendedBaseModel, extra=pydantic.Extra.forbid, orm_mode=True)
         if isinstance(v, dict):
             return HttpRequestPayload(**v)
 
+    @validator('authorization', pre=True, always=True)
+    def authorization_autoconvert(cls, v):
+        if isinstance(v, BaseAuthorization):
+            return v
+        if isinstance(v, dict):
+            return BaseAuthorization(**v)
+
     @property
     def size(self) -> int:
         if self.body is not None:
             return len(self.body)
         return 0
 
-    def dict(
-            self,
-            **kwargs
-    ) -> Dict[str, Any]:
-        kwargs.update({"exclude_none": True})
-        return super().dict(**kwargs)
 
 
 class HttpGetRequest(HttpRequest):
@@ -214,7 +218,7 @@ class HttpResponse(ExtendedBaseModel, extra=pydantic.Extra.forbid, orm_mode=True
     text: Optional[str]
     """ The text of the response. """
 
-    _text_copy: Optional[str]
+    json_body: Optional[str]
     """ A backup of the response text. """
 
     end_at: Optional[datetime]
@@ -222,6 +226,21 @@ class HttpResponse(ExtendedBaseModel, extra=pydantic.Extra.forbid, orm_mode=True
 
     elapsed_time: Optional[float]
     """ Elapsed time between receiving response and starting request. """
+
+    @root_validator(pre=False)
+    def _set_fields(cls, values: dict) -> dict:
+        """This is a validator that sets the field values based on the
+        the user's account type.
+
+        Args:
+            values (dict): Stores the attributes of the User object.
+
+        Returns:
+            dict: The attributes of the user object with the user's fields.
+        """
+        if is_json(values["text"]):
+            values["json_body"] = json.loads(values["text"])
+        return values
 
 
 class HttpHit(ExtendedBaseModel):
@@ -264,7 +283,7 @@ class HttpHit(ExtendedBaseModel):
 
     class Config:
         json_encoders = {
-            datetime: lambda dt: arrow.get(dt).isoformat(),
+            datetime: lambda dt: arrow.get(dt),
             HttpRequest: lambda req: req.dict(),
             HttpResponse: lambda res: res.dict(),
         }

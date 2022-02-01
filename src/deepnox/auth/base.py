@@ -8,7 +8,7 @@ This file is a part of python-wipbox project.
 (c) 2021, Deepnox SAS.
 """
 from enum import unique
-from typing import Any, Optional
+from typing import Any, Optional, Dict
 
 import pydantic
 
@@ -24,6 +24,8 @@ class AuthorizationType(DeepnoxEnum):
     BASIC_AUTH = "basic_auth"
     """ The basic authorization type. """
 
+    def __str__(self):
+        return self.value
 
 
 class BaseAuthorization(pydantic.BaseModel):
@@ -34,29 +36,21 @@ class BaseAuthorization(pydantic.BaseModel):
     type: Optional[AuthorizationType] = None
     """ The authorization type. """
 
-    @property
-    def instance(self) -> int:
-        raise NotImplementedError
-
-
-
-class BasicAuthorization(BaseAuthorization):
-    """
-    The basic authorization.
-    """
-
-    type: AuthorizationType = AuthorizationType.BASIC_AUTH
-    """ The basic authorization type. """
-
-    username: str = None
-    """ The username. """
-
-    password: str = None
-    """ The password. """
-
-    encoding: str = 'latin1'
-    """ The language encoding. """
+    values: Optional[Dict] = {}
+    """ """
 
     @property
-    def instance(self) -> int:
-        return aiohttp.BasicAuth(login=self.username, password=self.password, encoding=self.encoding)
+    def instance(self) -> Any:
+        #if self.type == AuthorizationType.BASIC_AUTH:
+            d = {"login": self.values.get("username"),
+                 "password": self.values.get("password"),
+                 "encoding": self.values.get("encoding", "latin1")
+                 }
+            return aiohttp.BasicAuth(**d)
+
+    def dict(
+            self,
+            **kwargs
+    ) -> Dict[str, Any]:
+        kwargs.update({"exclude_none": True})
+        return super().dict(**kwargs)
