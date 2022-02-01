@@ -2,6 +2,12 @@
 
 ## v0
 
+### v0.0.14
+
+#### v0.0.14.1
+
+- Reliability and simplification of configuration loading.
+
 ### v0.0.8
 
 - Try CI/CD publishing process.
