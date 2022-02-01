@@ -13,9 +13,11 @@ import logging
 import time
 import urllib
 from types import FunctionType
+from urllib.parse import urlencode
 
 from deepnox import loggers
-from deepnox.auth.base import BaseAuthorization, BasicAuthorization
+from deepnox.aiorest.credentials import AuthorizationType
+from deepnox.auth.base import BaseAuthorization
 from deepnox.network.http import HttpRequest, HttpResponse, HttpHit, HttpMethod, HttpRequestPayload
 from deepnox.third import aiohttp
 
@@ -48,6 +50,7 @@ class HttpClient(object):
             timeout = aiohttp.ClientTimeout(total=None, sock_connect=30, sock_read=30)
             connector = aiohttp.TCPConnector(ssl=False)
             return aiohttp.ClientSession(cookie_jar=cookie_jar, timeout=timeout, connector=connector)
+
         return _wrap
 
     async def _parse_response(self, req: HttpRequest, resp: HttpResponse):
@@ -80,12 +83,18 @@ class HttpClient(object):
             if isinstance(req.payload.params, dict):
                 data.update({"params": req.payload.params})
             if isinstance(req.payload.data, str):
-                data.update({"data": req.payload.data})
+                data.update({"data": urlencode(req.payload.data)})
+            if isinstance(req.payload.data, dict):
+                if req.payload.is_json is True:
+                    data.update({"data": req.payload.data})
+                else:
+                    print(" urlencode(req.payload.data)",  urlencode(req.payload.data))
+                    data.update({"data": urlencode(req.payload.data)})
 
-        if isinstance(req.authorization, dict):
-            if isinstance(req.authorization.basic_auth, dict):
-                data.update({"auth": BasicAuthorization(username=req.authorization.basic_auth.username,
-                                                        password=req.authorization.password).get()})
+        print("req.authorization", type(req.authorization))
+        if isinstance(req.authorization, BaseAuthorization):
+            data.update({"auth": req.authorization.instance})
+        print("===>", data)
         return data
 
     async def request(self, req: HttpRequest):
@@ -192,4 +201,3 @@ class HttpClient(object):
     # async def _close_session(self):
     #     if not self._session.closed:
     #         self._session.close()
-
