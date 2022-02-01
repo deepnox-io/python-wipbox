@@ -10,7 +10,7 @@ This file is a part of python-wipbox project.
 import json
 from datetime import datetime
 from enum import EnumMeta, unique
-from typing import Dict, Optional, Any, Union
+from typing import Dict, Optional, Any, Union, List
 
 from pydantic import validator, root_validator
 
@@ -73,8 +73,26 @@ class HttpRequestPayload(ExtendedBaseModel, extra=pydantic.Extra.forbid, orm_mod
     data: Optional[Union[str, Dict]] = None
     """ The raw body passed to request. """
 
+    json_data: Optional[Union[List, Dict]] = None
+
     is_json: bool = True
     """ Specify if data is or not a JSON. """
+
+    # @root_validator(pre=False)
+    # def _set_fields(cls, values: dict) -> dict:
+    #     if is_json(values["data"]):
+    #         values["json_data"] = json.loads(values["data"])
+    #     return values
+    #
+    #
+    # def dict(
+    #         self,
+    #         **kwargs
+    # ) -> Dict[str, Any]:
+    #     if self.json_data is not None:
+    #         self.data = None
+    #     kwargs.update({"exclude_none": True})
+    #     return super().dict(**kwargs)
 
 
 class HttpRequest(ExtendedBaseModel, extra=pydantic.Extra.forbid, orm_mode=True):
@@ -94,12 +112,6 @@ class HttpRequest(ExtendedBaseModel, extra=pydantic.Extra.forbid, orm_mode=True)
 
     payload: Optional[HttpRequestPayload] = None
     """ The HTTP payload. """
-
-    params: Optional[Dict] = None
-    """ The parameters to send. """
-
-    data: Optional[str] = None
-    """ The data to send. """
 
     json_data: Optional[Dict] = None
     """ The JSON to send. """
@@ -144,6 +156,7 @@ class HttpRequest(ExtendedBaseModel, extra=pydantic.Extra.forbid, orm_mode=True)
         if self.body is not None:
             return len(self.body)
         return 0
+
 
 
 
@@ -229,18 +242,18 @@ class HttpResponse(ExtendedBaseModel, extra=pydantic.Extra.forbid, orm_mode=True
 
     @root_validator(pre=False)
     def _set_fields(cls, values: dict) -> dict:
-        """This is a validator that sets the field values based on the
-        the user's account type.
-
-        Args:
-            values (dict): Stores the attributes of the User object.
-
-        Returns:
-            dict: The attributes of the user object with the user's fields.
-        """
         if is_json(values["text"]):
             values["json_body"] = json.loads(values["text"])
         return values
+
+    def dict(
+            self,
+            **kwargs
+    ) -> Dict[str, Any]:
+        if self.json_body is not None:
+            self.text = None
+        kwargs.update({"exclude_none": True})
+        return super().dict(**kwargs)
 
 
 class HttpHit(ExtendedBaseModel):
