@@ -86,15 +86,11 @@ class HttpClient(object):
                 data.update({"data": urlencode(req.payload.data)})
             if isinstance(req.payload.data, dict):
                 if req.payload.is_json is True:
-                    data.update({"data": req.payload.data})
+                    data.update({"data": req.payload.json})
                 else:
-                    print(" urlencode(req.payload.data)",  urlencode(req.payload.data))
                     data.update({"data": urlencode(req.payload.data)})
-
-        print("req.authorization", type(req.authorization))
         if isinstance(req.authorization, BaseAuthorization):
             data.update({"auth": req.authorization.instance})
-        print("===>", data)
         return data
 
     async def request(self, req: HttpRequest):
