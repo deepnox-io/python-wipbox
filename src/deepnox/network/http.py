@@ -7,15 +7,14 @@ This file is a part of python-wipbox project.
 
 (c) 2021, Deepnox SAS.
 """
-import json
-from dataclasses import Field
+
 from datetime import datetime
 from enum import EnumMeta, unique
 from typing import Dict, Optional, Any, Union
-from uuid import UUID, uuid4
 
 from pydantic import validator
 
+from deepnox.auth.base import BaseAuthorization
 from deepnox.core.enumerations import DeepnoxEnum
 from deepnox.models import ExtendedBaseModel
 from deepnox.network.urls import Url
@@ -102,11 +101,9 @@ class HttpRequest(ExtendedBaseModel, extra=pydantic.Extra.forbid, orm_mode=True)
     json_data: Optional[Dict] = None
     """ The JSON to send. """
 
-    authorization: Optional[str] = None
+    authorization: Optional[BaseAuthorization] = None
     """
     The provided authorization.
-    
-    :todo: Implements authorization.
     """
 
     start_at: Optional[datetime] = None
