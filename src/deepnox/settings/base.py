@@ -16,7 +16,7 @@ import yaml
 
 from deepnox import loggers
 from deepnox.core.base import DeepnoxDict
-from deepnox.utils.maps import UpperMap
+from deepnox.utils.maps import UpperMap, Map
 
 LOGGER = loggers.factory(__name__)
 """ The module LOGGER. """
@@ -53,27 +53,12 @@ def read_yaml_file(filename: str):
             )
 
 
-class SettingsReader(DeepnoxDict):
+def load_settings(filename: str = None):
     """
-    A class to manage settings.
+    Create a new settings object from provided configuration (a YAML file).
+    :param filename: The configuration filename.
     """
-
-    def __init__(self, filename: str = None):
-        """
-        Create a new settings object from provided configuration (a YAML file).
-        :param filename: The configuration filename.
-        """
-        if filename is None or os.path.isfile(filename) is False:
-            raise NotFoundConfigurationError(filename=filename)
-        self._settings = UpperMap(read_yaml_file(filename))
-
-    def __iter__(self):
-        for attr, value in self._settings.items():
-            yield attr, value
-
-    def __getattr__(self, item):
-        if item in self._settings.keys():
-            return self._settings.get(item)
-        return super().__getattr__(item)
-
+    if filename is None or os.path.isfile(filename) is False:
+        raise NotFoundConfigurationError(filename=filename)
+    return Map(read_yaml_file(filename))
 
