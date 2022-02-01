@@ -15,6 +15,7 @@ import urllib
 from types import FunctionType
 
 from deepnox import loggers
+from deepnox.auth.base import BaseAuthorization, BasicAuthorization
 from deepnox.network.http import HttpRequest, HttpResponse, HttpHit, HttpMethod, HttpRequestPayload
 from deepnox.third import aiohttp
 
@@ -71,13 +72,20 @@ class HttpClient(object):
 
     def _build_request_args(self, req: HttpRequest):
         data = {"url": str(req.url)}
+
         if isinstance(req.headers, dict):
             data.update({"headers": req.headers})
+
         if isinstance(req.payload, HttpRequestPayload):
             if isinstance(req.payload.params, dict):
                 data.update({"params": req.payload.params})
             if isinstance(req.payload.data, str):
                 data.update({"data": req.payload.data})
+
+        if isinstance(req.authorization, dict):
+            if isinstance(req.authorization.basic_auth, dict):
+                data.update({"auth": BasicAuthorization(username=req.authorization.basic_auth.username,
+                                                        password=req.authorization.password).get()})
         return data
 
     async def request(self, req: HttpRequest):

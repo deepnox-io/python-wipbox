@@ -1,32 +1,62 @@
 #!/usr/bin/env python3
-import aiohttp
 
+"""
+Module: deepnox.auth.base
 
-class BaseAuthorization(object):
+This file is a part of python-wipbox project.
+
+(c) 2021, Deepnox SAS.
+"""
+from enum import unique
+from typing import Any, Optional
+
+import pydantic
+
+from deepnox.core.enumerations import DeepnoxEnum
+from deepnox.third import aiohttp
+
+@unique
+class AuthorizationType(DeepnoxEnum):
     """
-    A base class for managing authorizations/permissions.
-    """
-
-    def __init__(self, auth_obj: object = None):
-        self._auth_obj = auth_obj
-
-    @classmethod
-    def from_dict(cls, d: dict) -> object:
-        """
-        :return: Object as a JSON string.
-        """
-        if not isinstance(d, dict):
-            raise TypeError(f'parameter must be of type: `dict`')
-        o = cls()
-        for k, v in d.items():
-            if k in o.__attrs__:
-                setattr(o, k, v)
-        return o
-
-class HttpBasicAuth(BaseAuthorization):
-    """
-    An encapsulation of basic HTTP authentication.
+    The list of authorization types.
     """
 
-    def __init__(self, username: str = None, password: str = None, encoding: str = 'latin1'):
-        self._auth_obj = aiohttp.BasicAuth(username, password, encoding)
+    BASIC_AUTH = "basic_auth"
+    """ The basic authorization type. """
+
+
+
+class BaseAuthorization(pydantic.BaseModel):
+    """
+    The base class for authorization.
+    """
+
+    type: Optional[AuthorizationType] = None
+    """ The authorization type. """
+
+    @property
+    def instance(self) -> int:
+        raise NotImplementedError
+
+
+
+class BasicAuthorization(BaseAuthorization):
+    """
+    The basic authorization.
+    """
+
+    type: AuthorizationType = AuthorizationType.BASIC_AUTH
+    """ The basic authorization type. """
+
+    username: str = None
+    """ The username. """
+
+    password: str = None
+    """ The password. """
+
+    encoding: str = 'latin1'
+    """ The language encoding. """
+
+    @property
+    def instance(self) -> int:
+        return aiohttp.BasicAuth(login=self.username, password=self.password, encoding=self.encoding)

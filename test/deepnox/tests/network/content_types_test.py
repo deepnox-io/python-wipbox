@@ -11,10 +11,11 @@ This file is a part of (denier.io).
 
 import unittest
 
+from deepnox.helpers.testing_helpers import BaseTestCase
 from deepnox.network.content_types import ContentType
 
 
-class ContentTypeTestCase(unittest.TestCase):
+class ContentTypeTestCase(BaseTestCase):
 
     def test__valididity_of_content_type(self):
         self.assertEqual(ContentType.APPLICATION__JSON, ContentType('application/json'))
