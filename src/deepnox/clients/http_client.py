@@ -24,6 +24,90 @@ from deepnox.third import aiohttp
 LOGGER = loggers.factory(__name__)
 """ The module LOGGER. """
 
+import aiohttp
+
+
+def request_tracer(results_collector):
+    """
+    Provides request tracing to aiohttp client sessions.
+    :param results_collector: a dict to which the tracing results will be added.
+    :return: an aiohttp.TraceConfig object.
+
+    :example:
+
+    >>> import asyncio
+    >>> import aiohttp
+    >>> from aiohttp_trace import request_tracer
+    >>>
+    >>>
+    >>> async def func():
+    >>>     trace = {}
+    >>>     async with aiohttp.ClientSession(trace_configs=[request_tracer(trace)]) as client:
+    >>>         async with client.get('https://github.com') as response:
+    >>>             print(trace)
+    >>>
+    >>> asyncio.get_event_loop().run_until_complete(func())
+    {'dns_lookup_and_dial': 43.3, 'connect': 334.29, 'transfer': 148.48, 'total': 526.08, 'is_redirect': False}
+    """
+
+    async def on_request_start(session, context, params):
+        context.on_request_start = session.loop.time()
+        context.is_redirect = False
+
+    async def on_connection_create_start(session, context, params):
+        since_start = session.loop.time() - context.on_request_start
+        context.on_connection_create_start = since_start
+
+    async def on_request_redirect(session, context, params):
+        since_start = session.loop.time() - context.on_request_start
+        context.on_request_redirect = since_start
+        context.is_redirect = True
+
+    async def on_dns_resolvehost_start(session, context, params):
+        since_start = session.loop.time() - context.on_request_start
+        context.on_dns_resolvehost_start = since_start
+
+    async def on_dns_resolvehost_end(session, context, params):
+        since_start = session.loop.time() - context.on_request_start
+        context.on_dns_resolvehost_end = since_start
+
+    async def on_connection_create_end(session, context, params):
+        since_start = session.loop.time() - context.on_request_start
+        context.on_connection_create_end = since_start
+
+    async def on_request_chunk_sent(session, context, params):
+        since_start = session.loop.time() - context.on_request_start
+        context.on_request_chunk_sent = since_start
+
+    async def on_request_end(session, context, params):
+        total = session.loop.time() - context.on_request_start
+        context.on_request_end = total
+
+        dns_lookup_and_dial = context.on_dns_resolvehost_end - context.on_dns_resolvehost_start
+        connect = context.on_connection_create_end - dns_lookup_and_dial
+        transfer = total - context.on_connection_create_end
+        is_redirect = context.is_redirect
+
+        results_collector['dns_lookup_and_dial'] = round(dns_lookup_and_dial * 1000, 2)
+        results_collector['connect'] = round(connect * 1000, 2)
+        results_collector['transfer'] = round(transfer * 1000, 2)
+        results_collector['total'] = round(total * 1000, 2)
+        results_collector['is_redirect'] = is_redirect
+
+    trace_config = aiohttp.TraceConfig()
+
+    trace_config.on_request_start.append(on_request_start)
+    trace_config.on_request_redirect.append(on_request_redirect)
+    trace_config.on_dns_resolvehost_start.append(on_dns_resolvehost_start)
+    trace_config.on_dns_resolvehost_end.append(on_dns_resolvehost_end)
+    trace_config.on_connection_create_start.append(on_connection_create_start)
+    trace_config.on_connection_create_end.append(on_connection_create_end)
+    trace_config.on_request_end.append(on_request_end)
+    trace_config.on_request_chunk_sent.append(on_request_chunk_sent)
+
+    return trace_config
+
+_tracer = {}
 
 class HttpClient(object):
     """
@@ -43,13 +127,15 @@ class HttpClient(object):
         self.loop = loop or asyncio.get_event_loop()
         self.AUDITOR = auditor_logger or loggers.auditor(f'auditor')
 
+
     @property
     def get_session(self):
         def _wrap():
             cookie_jar = aiohttp.CookieJar()
             timeout = aiohttp.ClientTimeout(total=None, sock_connect=30, sock_read=30)
             connector = aiohttp.TCPConnector(ssl=False)
-            return aiohttp.ClientSession(cookie_jar=cookie_jar, timeout=timeout, connector=connector)
+            return aiohttp.ClientSession(cookie_jar=cookie_jar, timeout=timeout, connector=connector,
+                                         trace_configs=[request_tracer(_tracer)])
 
         return _wrap
 
@@ -70,11 +156,11 @@ class HttpClient(object):
                                 headers=resp.headers,
                                 text=text,
                                 end_at=end_at,
-                                elapsed_time=end_at - req.start_at)
+                                elapsed_time=(end_at - req.start_at)*1000)
         return response
 
     def _build_request_args(self, req: HttpRequest):
-        data = {"url": str(req.url)}
+        data = {"url": str(req.url), }
 
         if isinstance(req.headers, dict):
             data.update({"headers": req.headers})
@@ -82,15 +168,15 @@ class HttpClient(object):
         if isinstance(req.payload, HttpRequestPayload):
             if isinstance(req.payload.params, dict):
                 data.update({"params": req.payload.params})
+            print("req.payload", req.payload.data)
             if isinstance(req.payload.data, str):
                 data.update({"data": urlencode(req.payload.data)})
             if isinstance(req.payload.data, dict):
-                if req.payload.is_json is True:
-                    data.update({"data": req.payload.json})
-                else:
-                    data.update({"data": urlencode(req.payload.data)})
+                data.update({"data": urlencode(req.payload.data)})
+
         if isinstance(req.authorization, BaseAuthorization):
             data.update({"auth": req.authorization.instance})
+
         return data
 
     async def request(self, req: HttpRequest):
@@ -110,6 +196,7 @@ class HttpClient(object):
                 async with session_method_fn(**self._build_request_args(req)) as resp:
                     res = await self._parse_response(req, resp)
                     self._trace_audit(req, res)
+                    self.LOG.info("_tracer", extra=_tracer)
                     return res
             except Exception as e:
                 self.LOG.error(f'Response error: (req:{req.url})', exc_info=e)
