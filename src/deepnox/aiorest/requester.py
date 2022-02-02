@@ -140,7 +140,7 @@ class AioRestClient(object, metaclass=RestClientMetaclass):
         try:
             async with self.session(basic_auth=basic_auth).request(method=str(method), url=url, **kwargs) as resp:
                 self.LOG.debug(f'resp.status: {resp.status}')
-                http_response.elapsed_time = int((time.monotonic() - start_ts) * 1000)
+                http_response.elapsed_time = float((time.monotonic() - start_ts) * 1000)
                 http_response.text = await resp.text()
                 if is_json(http_response.text) is True:
                     http_response.json = json.loads(http_response.text)
