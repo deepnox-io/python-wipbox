@@ -14,7 +14,7 @@ from typing import Dict, Optional, Any, Union, List
 
 from pydantic import validator, root_validator
 
-from deepnox.auth.credentials import BaseAuthorization
+from deepnox.auth.credentials import BaseAuthorization, AuthorizationType
 from deepnox.core.enumerations import DeepnoxEnum
 from deepnox.models import ExtendedBaseModel
 from deepnox.network.urls import Url
@@ -146,10 +146,14 @@ class HttpRequest(ExtendedBaseModel, extra=pydantic.Extra.forbid, orm_mode=True)
 
     @validator('authorization', pre=True, always=True)
     def authorization_autoconvert(cls, v):
+        print("9// ", v)
         if isinstance(v, BaseAuthorization):
+            print("10//", v)
             return v
         if isinstance(v, dict):
+            print("11/")
             return BaseAuthorization(**v)
+        return BaseAuthorization(type=AuthorizationType.BEARER_TOKEN, values={})
 
     @property
     def size(self) -> int:
