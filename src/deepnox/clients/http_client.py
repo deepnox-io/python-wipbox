@@ -138,11 +138,12 @@ class HttpClient(object):
         _args = {"loop": self.loop,
                  "raise_for_status": self.raise_for_status}
 
+        print("6//", authorization.__class__)
         if isinstance(authorization, BaseAuthorization):
-            print("ca passe la", type(authorization.type), type(AuthorizationType.BASIC_AUTH), print(str(str(AuthorizationType.BASIC_AUTH))))
+            print("4// ca passe la", type(authorization.type), type(AuthorizationType.BASIC_AUTH), print(str(str(AuthorizationType.BASIC_AUTH))))
             if str(authorization.type) == str(AuthorizationType.BASIC_AUTH):
-                print("ca passe ici")
-                _args["auth"] = aiohttp.BasicAuth(**authorization.values)
+                print("5// ca passe ici", authorization.instance)
+                _args["auth"] = authorization.instance
 
         return aiohttp.ClientSession(**_args)
 
