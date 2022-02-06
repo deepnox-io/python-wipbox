@@ -1,6 +1,23 @@
 #!/usr/bin/env python3
 
 """
+Module: "deepnox.auth.credentials
+
+This file is a part of python-wipbox project.
+
+(c) 2021, Deepnox SAS.
+"""
+import aiohttp
+
+from deepnox.core.enumerations import DeepnoxEnum
+
+
+class Credentials(object):
+    pass
+
+#!/usr/bin/env python3
+
+"""
 Module: deepnox.auth.base
 
 This file is a part of python-wipbox project.
@@ -21,11 +38,17 @@ class AuthorizationType(DeepnoxEnum):
     The list of authorization types.
     """
 
-    BASIC_AUTH = "basic_auth"
+    BASIC_AUTH: str = "basic_auth"
     """ The basic authorization type. """
 
     def __str__(self):
         return self.value
+
+    def __eq__(self, other):
+        if type(self) == type(other):
+            return str(self) == other
+        if isinstance(other, str):
+            return str(self) == other
 
 
 class BaseAuthorization(pydantic.BaseModel):
@@ -42,11 +65,11 @@ class BaseAuthorization(pydantic.BaseModel):
     @property
     def instance(self) -> Any:
         #if self.type == AuthorizationType.BASIC_AUTH:
-            d = {"login": self.values.get("username"),
-                 "password": self.values.get("password"),
-                 "encoding": self.values.get("encoding", "latin1")
-                 }
-            return aiohttp.BasicAuth(**d)
+        d = {"login": self.values.get("username"),
+             "password": self.values.get("password"),
+             "encoding": self.values.get("encoding", "latin1")
+             }
+        return aiohttp.BasicAuth(**d)
 
     def dict(
             self,

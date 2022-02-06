@@ -14,7 +14,7 @@ from typing import Dict, Optional, Any, Union, List
 
 from pydantic import validator, root_validator
 
-from deepnox.auth.base import BaseAuthorization
+from deepnox.auth.credentials import BaseAuthorization
 from deepnox.core.enumerations import DeepnoxEnum
 from deepnox.models import ExtendedBaseModel
 from deepnox.network.urls import Url
