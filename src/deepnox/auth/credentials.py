@@ -8,6 +8,7 @@ This file is a part of python-wipbox project.
 (c) 2021, Deepnox SAS.
 """
 import aiohttp
+from pydantic import validator
 
 from deepnox.core.enumerations import DeepnoxEnum
 
@@ -15,7 +16,8 @@ from deepnox.core.enumerations import DeepnoxEnum
 class Credentials(object):
     pass
 
-#!/usr/bin/env python3
+
+# !/usr/bin/env python3
 
 """
 Module: deepnox.auth.base
@@ -27,10 +29,11 @@ This file is a part of python-wipbox project.
 from enum import unique
 from typing import Any, Optional, Dict
 
-import pydantic
+from deepnox.third import pydantic
 
 from deepnox.core.enumerations import DeepnoxEnum
 from deepnox.third import aiohttp
+
 
 @unique
 class AuthorizationType(DeepnoxEnum):
@@ -41,14 +44,14 @@ class AuthorizationType(DeepnoxEnum):
     BASIC_AUTH: str = "basic_auth"
     """ The basic authorization type. """
 
+    BEARER_TOKEN: str = "bearer_token"
+    """ An authentication using bearer token mechanism. """
+
     def __str__(self):
         return self.value
 
     def __eq__(self, other):
-        if type(self) == type(other):
-            return str(self) == other
-        if isinstance(other, str):
-            return str(self) == other
+        return str(self) == str(other)
 
 
 class BaseAuthorization(pydantic.BaseModel):
@@ -64,12 +67,15 @@ class BaseAuthorization(pydantic.BaseModel):
 
     @property
     def instance(self) -> Any:
-        #if self.type == AuthorizationType.BASIC_AUTH:
-        d = {"login": self.values.get("username"),
-             "password": self.values.get("password"),
-             "encoding": self.values.get("encoding", "latin1")
-             }
-        return aiohttp.BasicAuth(**d)
+        if self.type == AuthorizationType.BASIC_AUTH:
+            d = {"login": self.values.get("username"),
+                 "password": self.values.get("password"),
+                 "encoding": self.values.get("encoding", "latin1")
+                 }
+            return aiohttp.BasicAuth(**d)
+
+        elif self.type == AuthorizationType.BEARER_TOKEN:
+            return self.values.get("bearer_token")
 
     def dict(
             self,
