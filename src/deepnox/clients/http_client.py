@@ -10,14 +10,15 @@ This file is a part of (deepnox.clients) project.
 
 import asyncio
 import logging
+import sys
 import time
 import urllib
-from types import FunctionType
+from types import FunctionType, TracebackType
+from typing import Optional, Type
 from urllib.parse import urlencode
 
 from deepnox import loggers
-from deepnox.aiorest.credentials import AuthorizationType
-from deepnox.auth.base import BaseAuthorization
+from deepnox.auth.credentials import BaseAuthorization, AuthorizationType
 from deepnox.network.http import HttpRequest, HttpResponse, HttpHit, HttpMethod, HttpRequestPayload
 from deepnox.third import aiohttp
 
@@ -35,9 +36,9 @@ def request_tracer(results_collector):
 
     :example:
 
-    >>> import asyncio
-    >>> import aiohttp
-    >>> from aiohttp_trace import request_tracer
+    # >>> import asyncio
+    # >>> import aiohttp
+    # >>> from . import request_tracer
     >>>
     >>>
     >>> async def func():
@@ -107,7 +108,9 @@ def request_tracer(results_collector):
 
     return trace_config
 
+
 _tracer = {}
+
 
 class HttpClient(object):
     """
@@ -122,22 +125,41 @@ class HttpClient(object):
                  loop: asyncio.AbstractEventLoop = None,
                  auditor_logger=None,
                  timeout: int = 30,
-                 verify_ssl: bool = False
+                 verify_ssl: bool = False,
+                 auth=None,
+                 raise_for_status: bool = False,
                  ):
         self.loop = loop or asyncio.get_event_loop()
+        self.raise_for_status = raise_for_status
+        self._client = self._create_client()
         self.AUDITOR = auditor_logger or loggers.auditor(f'auditor')
 
+    def _create_client(self, authorization: BaseAuthorization = None):
+        _args = {"loop": self.loop,
+                 "raise_for_status": self.raise_for_status}
 
-    @property
-    def get_session(self):
-        def _wrap():
-            cookie_jar = aiohttp.CookieJar()
-            timeout = aiohttp.ClientTimeout(total=None, sock_connect=30, sock_read=30)
-            connector = aiohttp.TCPConnector(ssl=False)
-            return aiohttp.ClientSession(cookie_jar=cookie_jar, timeout=timeout, connector=connector,
-                                         trace_configs=[request_tracer(_tracer)])
+        if isinstance(authorization, BaseAuthorization):
+            print("ca passe la", type(authorization.type), type(AuthorizationType.BASIC_AUTH), print(str(str(AuthorizationType.BASIC_AUTH))))
+            if str(authorization.type) == str(AuthorizationType.BASIC_AUTH):
+                print("ca passe ici")
+                _args["auth"] = aiohttp.BasicAuth(**authorization.values)
 
-        return _wrap
+        return aiohttp.ClientSession(**_args)
+
+    async def close(self) -> None:
+        return await self._client.close()
+
+    async def __aenter__(self) -> "HttpClient":
+        return self
+
+    async def __aexit__(
+            self,
+            exc_type: Optional[Type[BaseException]],
+            exc_val: Optional[BaseException],
+            exc_tb: Optional[TracebackType],
+    ) -> Optional[bool]:
+        await self.close()
+        return None
 
     async def _parse_response(self, req: HttpRequest, resp: HttpResponse):
         """
@@ -156,7 +178,7 @@ class HttpClient(object):
                                 headers=resp.headers,
                                 text=text,
                                 end_at=end_at,
-                                elapsed_time=(end_at - req.start_at)*1000)
+                                elapsed_time=(end_at - req.start_at) * 1000)
         return response
 
     def _build_request_args(self, req: HttpRequest):
@@ -168,18 +190,14 @@ class HttpClient(object):
         if isinstance(req.payload, HttpRequestPayload):
             if isinstance(req.payload.params, dict):
                 data.update({"params": req.payload.params})
-            print("req.payload", req.payload.data)
             if isinstance(req.payload.data, str):
                 data.update({"data": urlencode(req.payload.data)})
             if isinstance(req.payload.data, dict):
                 data.update({"data": urlencode(req.payload.data)})
 
-        if isinstance(req.authorization, BaseAuthorization):
-            data.update({"auth": req.authorization.instance})
-
         return data
 
-    async def request(self, req: HttpRequest):
+    def request(self, req: HttpRequest):
         """
         Send a HTTP request.
         :param req: The request.
@@ -189,17 +207,9 @@ class HttpClient(object):
         LOGGER.debug(f'get(req:{req})', extra={"request": req.dict()})
         method = str(getattr(req, "method"))
         req.start_at = time.time()
-        async with self.get_session() as session:
-            try:
-                self.LOG.debug(f"req.url.to_python() {req.url}")
-                session_method_fn: FunctionType = getattr(session, method)
-                async with session_method_fn(**self._build_request_args(req)) as resp:
-                    res = await self._parse_response(req, resp)
-                    self._trace_audit(req, res)
-                    self.LOG.info("_tracer", extra=_tracer)
-                    return res
-            except Exception as e:
-                self.LOG.error(f'Response error: (req:{req.url})', exc_info=e)
+        self._client = self._create_client(authorization=req.authorization)
+        d = self._build_request_args(req)
+        return getattr(self._client, method)(**d)
 
     async def get(self, req: HttpRequest):
         """

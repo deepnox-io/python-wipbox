@@ -1,6 +1,6 @@
 import unittest
 
-from deepnox.aiorest.credentials import Credentials, BasicAuth
+from "deepnox.auth.credentials import Credentials, BasicAuth
 
 
 class CredentialsTestCase(unittest.TestCase):

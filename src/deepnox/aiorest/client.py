@@ -16,7 +16,7 @@ from typing import Dict, Tuple, Type, Union
 from aiohttp import ClientSession
 
 from deepnox import loggers
-from deepnox.aiorest.credentials import AuthorizationType, BasicAuth, Credentials
+from "deepnox.auth.credentials import AuthorizationType, BasicAuth, Credentials
 from deepnox.aiorest.resources import Resource
 from deepnox.network import Scheme
 from deepnox.network.urls import Url
