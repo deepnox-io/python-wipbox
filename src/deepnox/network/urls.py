@@ -71,7 +71,7 @@ class Url(ExtendedBaseModel):
 
     def __str__(self):
         url = f"{str(self.scheme)}://" + "/".join(
-            [remove_slash_at_start_and_at_end(self.hostname), remove_slash_at_start_and_at_end(self.path)])
+            [remove_slash_at_start_and_at_end(self.hostname), self.path])
         # url = self._add_query_string_params_to_url(url)
         return url
 

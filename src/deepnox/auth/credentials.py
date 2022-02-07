@@ -75,6 +75,7 @@ class BaseAuthorization(pydantic.BaseModel):
             return aiohttp.BasicAuth(**d)
 
         elif self.type == AuthorizationType.BEARER_TOKEN:
+            # print("je passe ici", self.values.get("bearer_token"))
             return self.values.get("bearer_token")
 
     def dict(

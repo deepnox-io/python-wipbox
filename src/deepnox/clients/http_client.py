@@ -196,7 +196,7 @@ class HttpClient(object):
                 headers = data.get("headers", {})
                 headers.update("Autorization", f"Bearer {req.authorization.instance}")
 
-                print("7// bearer ", headers)
+                # print("7// bearer ", headers)
 
         if isinstance(req.headers, dict):
             data.update({"headers": req.headers})
