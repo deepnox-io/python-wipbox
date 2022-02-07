@@ -111,7 +111,6 @@ def request_tracer(results_collector):
 
 _tracer = {}
 
-
 class HttpClient(object):
     """
     The HTTP client.
@@ -131,16 +130,27 @@ class HttpClient(object):
                  ):
         self.loop = loop or asyncio.get_event_loop()
         self.raise_for_status = raise_for_status
+        self._cookie_jar = aiohttp.CookieJar(loop=self.loop, unsafe=True, quote_cookie=False)
         self._client = self._create_client()
         self.AUDITOR = auditor_logger or loggers.auditor(f'auditor')
 
-    def _create_client(self, authorization: BaseAuthorization = None):
+
+    # def _store_cookies(self, domain: str):
+    #     cookies = self.cookie_jar.filter_cookies(domain)
+    #     print("101// Cookies", cookies)
+    #     return {cookie.key: cookie.value for key, cookie in cookies.items()}
+
+    def _create_client(self, authorization: BaseAuthorization = None, cookies: dict = None):
         _args = {"loop": self.loop,
-                 "raise_for_status": self.raise_for_status}
+                 "raise_for_status": self.raise_for_status,
+                 "cookies": cookies,
+                 }
+
+
 
         if isinstance(authorization, BaseAuthorization):
-            if authorization.type == AuthorizationType.BASIC_AUTH:
-                _args["auth"] = authorization.instance
+            _args["auth"] = authorization.instance
+
         return aiohttp.ClientSession(**_args)
 
     async def close(self) -> None:
@@ -191,7 +201,6 @@ class HttpClient(object):
         if isinstance(req.headers, dict):
             data.update({"headers": req.headers})
 
-
         if isinstance(req.payload, HttpRequestPayload):
             if isinstance(req.payload.params, dict):
                 data.update({"params": req.payload.params})
@@ -212,7 +221,7 @@ class HttpClient(object):
         LOGGER.debug(f'get(req:{req})', extra={"request": req.dict()})
         method = str(getattr(req, "method"))
         req.start_at = time.time()
-        self._client = self._create_client(authorization=req.authorization)
+        self._client = self._create_client(authorization=req.authorization, cookies=req.cookies)
         d = self._build_request_args(req)
         return getattr(self._client, method)(**d)
 
