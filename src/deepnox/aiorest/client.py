@@ -16,7 +16,7 @@ from typing import Dict, Tuple, Type, Union
 from aiohttp import ClientSession
 
 from deepnox import loggers
-from "deepnox.auth.credentials import AuthorizationType, BasicAuth, Credentials
+from deepnox.auth.credentials import AuthorizationType, Credentials
 from deepnox.aiorest.resources import Resource
 from deepnox.network import Scheme
 from deepnox.network.urls import Url
@@ -136,13 +136,4 @@ class RestClient(BaseRestClient, metaclass=RestClientMetaClass):
                          )
 
 
-if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-    base_url = Url(scheme=Scheme.HTTP, hostname='test.com')
-    credentials = BasicAuth('username', 'password')
-    client = BaseRestClient(
-        loop=loop, base_url=base_url, credentials=credentials
-    )
 
-    session = loop.run_until_complete(client.session())
-    print(session)

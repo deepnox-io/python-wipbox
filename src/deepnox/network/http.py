@@ -13,6 +13,7 @@ from enum import EnumMeta, unique
 from typing import Dict, Optional, Any, Union, List
 
 from pydantic import validator, root_validator
+from urllib3.util import parse_url
 
 from deepnox.auth.credentials import BaseAuthorization, AuthorizationType
 from deepnox.core.enumerations import DeepnoxEnum
@@ -60,6 +61,11 @@ class HttpMethod(DeepnoxEnum, metaclass=HttpMethodMetaClass):
     def get(cls, s):
         return getattr(cls, s.upper())
 
+    def __eq__(self, other):
+        if type(other) == str:
+            return other.lower() == str(self)
+        return self.value == other.value
+
 
 class HttpRequestPayload(ExtendedBaseModel, extra=pydantic.Extra.forbid, orm_mode=True):
     """
@@ -104,7 +110,7 @@ class HttpRequest(ExtendedBaseModel, extra=pydantic.Extra.forbid, orm_mode=True)
     method: HttpMethod = HttpMethod.GET
     """ The HTTP method to use. """
 
-    url: Optional[Union[Url, Dict]] = None
+    url: Optional[Union[str, Url, Dict]] = None
     """ The targeted url."""
 
     headers: Optional[Dict] = None
@@ -135,6 +141,9 @@ class HttpRequest(ExtendedBaseModel, extra=pydantic.Extra.forbid, orm_mode=True)
 
     @validator('url', pre=True, always=True)
     def url_autoconvert(cls, v):
+        if isinstance(v, str):
+            py_url = parse_url(v)
+            return Url(**{"scheme": py_url.scheme, "hostname": py_url.host, "path": py_url.path})
         if isinstance(v, Url):
             return v
         if isinstance(v, dict):
@@ -150,12 +159,12 @@ class HttpRequest(ExtendedBaseModel, extra=pydantic.Extra.forbid, orm_mode=True)
 
     @validator('authorization', pre=True, always=True)
     def authorization_autoconvert(cls, v):
-        print("9// ", v)
+        # print("9// ", v)
         if isinstance(v, BaseAuthorization):
-            print("10//", v)
+            #print("10//", v)
             return v
         if isinstance(v, dict):
-            print("11/")
+            #print("11/")
             return BaseAuthorization(**v)
         return BaseAuthorization(type=AuthorizationType.BEARER_TOKEN, values={})
 
