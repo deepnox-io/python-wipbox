@@ -4,6 +4,10 @@
 
 ### v0.0.14
 
+#### v0.0.14.2
+
+- Various alignements & enhancements.
+
 #### v0.0.14.1
 
 - Reliability and simplification of configuration loading.
