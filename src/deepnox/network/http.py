@@ -127,7 +127,11 @@ class HttpRequest(ExtendedBaseModel, extra=pydantic.Extra.forbid, orm_mode=True)
     end_at: Optional[datetime] = None
     """ Datetime ending request. """
 
-    body: Optional[str]
+    body: Optional[str] = None
+    """ The request body. """
+
+    cookies: Optional[Dict] = None
+    """ The cookies. """
 
     @validator('url', pre=True, always=True)
     def url_autoconvert(cls, v):
@@ -160,8 +164,6 @@ class HttpRequest(ExtendedBaseModel, extra=pydantic.Extra.forbid, orm_mode=True)
         if self.body is not None:
             return len(self.body)
         return 0
-
-
 
 
 class HttpGetRequest(HttpRequest):
@@ -258,6 +260,14 @@ class HttpResponse(ExtendedBaseModel, extra=pydantic.Extra.forbid, orm_mode=True
             self.text = None
         kwargs.update({"exclude_none": True})
         return super().dict(**kwargs)
+
+    @classmethod
+    def from_aiohttp(cls, resp, text):
+        return HttpResponse(
+            status_code=resp.status,
+            headers=resp.headers,
+            text=text,
+        )
 
 
 class HttpHit(ExtendedBaseModel):
