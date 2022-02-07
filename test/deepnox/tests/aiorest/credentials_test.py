@@ -1,6 +1,6 @@
 import unittest
 
-from "deepnox.auth.credentials import Credentials, BasicAuth
+from deepnox.auth.credentials import Credentials
 
 
 class CredentialsTestCase(unittest.TestCase):
@@ -8,13 +8,13 @@ class CredentialsTestCase(unittest.TestCase):
         self.assertIsInstance(Credentials(), Credentials)
 
 
-class BasicAuthTestCase(unittest.TestCase):
-    def test___init__(self):
-        self.assertRaises(TypeError, lambda: BasicAuth())
-        self.assertRaises(TypeError, lambda: BasicAuth("username"))
-        self.assertRaises(TypeError, lambda: BasicAuth(password="password"))
-        self.assertIsInstance(BasicAuth("username", "password"), BasicAuth)
-        self.assertIsInstance(BasicAuth("username", "password", encoding="utf8"), BasicAuth)
+# class BasicAuthTestCase(unittest.TestCase):
+#     def test___init__(self):
+#         self.assertRaises(TypeError, lambda: BasicAuth())
+#         self.assertRaises(TypeError, lambda: BasicAuth("username"))
+#         self.assertRaises(TypeError, lambda: BasicAuth(password="password"))
+#         self.assertIsInstance(BasicAuth("username", "password"), BasicAuth)
+#         self.assertIsInstance(BasicAuth("username", "password", encoding="utf8"), BasicAuth)
 
 if __name__ == '__main__':
     unittest.main()

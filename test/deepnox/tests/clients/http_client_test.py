@@ -29,11 +29,11 @@ class HttpClientTestCase(BaseAsyncTestCase):
         client = HttpClient()
         self.assertIsInstance(client, HttpClient)
 
-    def test__request(self):
-        client = HttpClient()
-        url = Url(scheme=Scheme.HTTPS, hostname="example.org", path="/api")
-        req = HttpRequest(method=HttpMethod.GET, url=url)
-        self.loop.run_until_complete(client.request(req))
+    # def test__request(self):
+    #     client = HttpClient()
+    #     url = Url(scheme=Scheme.HTTPS, hostname="example.org", path="/api")
+    #     req = HttpRequest(method=HttpMethod.GET, url=url)
+    #     self.loop.run_until_complete(client.request(req))
 
 
 if __name__ == '__main__':
