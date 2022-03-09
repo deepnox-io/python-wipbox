@@ -7,25 +7,8 @@ This file is a part of python-wipbox project.
 
 (c) 2021, Deepnox SAS.
 """
+
 import aiohttp
-from pydantic import validator
-
-from deepnox.core.enumerations import DeepnoxEnum
-
-
-class Credentials(object):
-    pass
-
-
-# !/usr/bin/env python3
-
-"""
-Module: deepnox.auth.base
-
-This file is a part of python-wipbox project.
-
-(c) 2021, Deepnox SAS.
-"""
 from enum import unique
 from typing import Any, Optional, Dict
 
@@ -33,6 +16,10 @@ from deepnox.third import pydantic
 
 from deepnox.core.enumerations import DeepnoxEnum
 from deepnox.third import aiohttp
+
+
+class Credentials(object):
+    pass
 
 
 @unique

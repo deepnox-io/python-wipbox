@@ -67,7 +67,7 @@ class HttpMethod(DeepnoxEnum, metaclass=HttpMethodMetaClass):
         return self.value == other.value
 
 
-class HttpRequestPayload(ExtendedBaseModel, extra=pydantic.Extra.forbid, orm_mode=True):
+class HttpRequestPayload(ExtendedBaseModel, orm_mode=True):
     """
     Payload of a HTTP request.
 

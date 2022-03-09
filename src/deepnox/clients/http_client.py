@@ -9,6 +9,7 @@ This file is a part of (deepnox.clients) project.
 """
 
 import asyncio
+import json
 import logging
 import sys
 import time
@@ -189,6 +190,12 @@ class HttpClient(object):
         return response
 
     def _build_request_args(self, req: HttpRequest):
+        """
+        :todo: REFACTORING !!!
+
+        :param req:
+        :return:
+        """
         data = {"url": str(req.url), }
 
         if isinstance(req.authorization, dict):
@@ -205,10 +212,13 @@ class HttpClient(object):
             if isinstance(req.payload.params, dict):
                 data.update({"params": req.payload.params})
             if isinstance(req.payload.data, str):
-                data.update({"data": urlencode(req.payload.data)})
+                data.update({"data": req.payload.data})
             if isinstance(req.payload.data, dict):
-                data.update({"data": urlencode(req.payload.data)})
-
+                if req.payload.is_json is True:
+                    print("je passe bien par les data///")
+                    data.update({"data": json.dumps(req.payload.data)})
+                else:
+                    data.update({"data": urlencode(req.payload.data)})
         return data
 
     def request(self, req: HttpRequest):
@@ -308,3 +318,4 @@ class HttpClient(object):
     # async def _close_session(self):
     #     if not self._session.closed:
     #         self._session.close()
+

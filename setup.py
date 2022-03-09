@@ -16,7 +16,7 @@ from distutils.core import Command
 __name__ = "wipbox"
 """ The project name. """
 
-__version__ = "0.0.14.2"
+__version__ = "0.0.15.0"
 """ The current version (work in progress). """
 
 
